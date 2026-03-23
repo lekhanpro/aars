@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 340" font-family="system-ui, -apple-system, sans-serif">
+  <defs>
+    <filter id="shadow2">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.1"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="340" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+
+  <!-- Title -->
+  <text x="400" y="32" text-anchor="middle" font-size="16" font-weight="700" fill="#1a202c">Feature Comparison — AARS vs Existing RAG Systems</text>
+
+  <!-- Table -->
+  <!-- Header row -->
+  <rect x="20" y="50" width="760" height="40" rx="8" fill="#2b6cb0"/>
+  <text x="150" y="76" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Capability</text>
+  <text x="340" y="76" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">AARS</text>
+  <text x="470" y="76" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Naive RAG</text>
+  <text x="600" y="76" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Hybrid RAG</text>
+  <text x="720" y="76" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">Self-RAG</text>
+
+  <!-- Row 1: Dynamic Strategy -->
+  <rect x="20" y="92" width="760" height="40" fill="#f7fafc"/>
+  <text x="150" y="117" text-anchor="middle" font-size="12" font-weight="500" fill="#2d3748">Dynamic Strategy</text>
+  <text x="340" y="118" text-anchor="middle" font-size="18" fill="#38a169">&#10003;</text>
+  <text x="470" y="118" text-anchor="middle" font-size="18" fill="#e53e3e">&#10007;</text>
+  <text x="600" y="118" text-anchor="middle" font-size="18" fill="#e53e3e">&#10007;</text>
+  <text x="720" y="118" text-anchor="middle" font-size="18" fill="#e53e3e">&#10007;</text>
+
+  <!-- Row 2: Query Rewriting -->
+  <rect x="20" y="132" width="760" height="40" fill="#ffffff"/>
+  <text x="150" y="157" text-anchor="middle" font-size="12" font-weight="500" fill="#2d3748">Query Rewriting</text>
+  <text x="340" y="158" text-anchor="middle" font-size="18" fill="#38a169">&#10003;</text>
+  <text x="470" y="158" text-anchor="middle" font-size="18" fill="#e53e3e">&#10007;</text>
+  <text x="600" y="158" text-anchor="middle" font-size="18" fill="#e53e3e">&#10007;</text>
+  <text x="720" y="158" text-anchor="middle" font-size="18" fill="#38a169">&#10003;</text>
+
+  <!-- Row 3: Reflection Loop -->
+  <rect x="20" y="172" width="760" height="40" fill="#f7fafc"/>
+  <text x="150" y="197" text-anchor="middle" font-size="12" font-weight="500" fill="#2d3748">Reflection Loop</text>
+  <text x="340" y="198" text-anchor="middle" font-size="18" fill="#38a169">&#10003;</text>
+  <text x="470" y="198" text-anchor="middle" font-size="18" fill="#e53e3e">&#10007;</text>
+  <text x="600" y="198" text-anchor="middle" font-size="18" fill="#e53e3e">&#10007;</text>
+  <text x="720" y="198" text-anchor="middle" font-size="18" fill="#38a169">&#10003;</text>
+
+  <!-- Row 4: Multi-hop -->
+  <rect x="20" y="212" width="760" height="40" fill="#ffffff"/>
+  <text x="150" y="237" text-anchor="middle" font-size="12" font-weight="500" fill="#2d3748">Multi-hop Retrieval</text>
+  <text x="340" y="238" text-anchor="middle" font-size="18" fill="#38a169">&#10003;</text>
+  <text x="470" y="238" text-anchor="middle" font-size="18" fill="#e53e3e">&#10007;</text>
+  <text x="600" y="238" text-anchor="middle" font-size="18" fill="#e53e3e">&#10007;</text>
+  <text x="720" y="238" text-anchor="middle" font-size="18" fill="#e53e3e">&#10007;</text>
+
+  <!-- Row 5: Diversity Fusion -->
+  <rect x="20" y="252" width="760" height="40" rx="0 0 8 8" fill="#f7fafc"/>
+  <text x="150" y="277" text-anchor="middle" font-size="12" font-weight="500" fill="#2d3748">Diversity Fusion</text>
+  <text x="340" y="278" text-anchor="middle" font-size="18" fill="#38a169">&#10003;</text>
+  <text x="470" y="278" text-anchor="middle" font-size="18" fill="#e53e3e">&#10007;</text>
+  <text x="600" y="278" text-anchor="middle" font-size="18" fill="#38a169">&#10003;</text>
+  <text x="720" y="278" text-anchor="middle" font-size="18" fill="#e53e3e">&#10007;</text>
+
+  <!-- Borders -->
+  <rect x="20" y="50" width="760" height="242" rx="8" fill="none" stroke="#e2e8f0" stroke-width="1"/>
+
+  <!-- Score summary -->
+  <rect x="280" y="305" width="80" height="24" rx="12" fill="#c6f6d5"/>
+  <text x="320" y="322" text-anchor="middle" font-size="11" font-weight="700" fill="#276749">5 / 5</text>
+  <rect x="410" y="305" width="80" height="24" rx="12" fill="#fed7d7"/>
+  <text x="450" y="322" text-anchor="middle" font-size="11" font-weight="700" fill="#9b2c2c">0 / 5</text>
+  <rect x="540" y="305" width="80" height="24" rx="12" fill="#fefcbf"/>
+  <text x="580" y="322" text-anchor="middle" font-size="11" font-weight="700" fill="#975a16">1 / 5</text>
+  <rect x="660" y="305" width="80" height="24" rx="12" fill="#fefcbf"/>
+  <text x="700" y="322" text-anchor="middle" font-size="11" font-weight="700" fill="#975a16">2 / 5</text>
+</svg>

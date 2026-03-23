@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AARS — Agentic Adaptive Retrieval System</title>
+<style>
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #0f172a;
+  --card: #1e293b;
+  --navy: #1a365d;
+  --teal: #14b8a6;
+  --blue: #3b82f6;
+  --white: #ffffff;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--white);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── Navbar ──────────────────────────────────────────────── */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: var(--navy);
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(1rem, 4vw, 3rem);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.4);
+}
+
+.navbar-logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--teal);
+  text-decoration: none;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+}
+
+.navbar-links a {
+  color: var(--gray-300);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.navbar-links a:hover {
+  color: var(--teal);
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 4px;
+}
+
+.hamburger span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--gray-300);
+  border-radius: 2px;
+  transition: transform 0.3s, opacity 0.3s;
+}
+
+/* ── Sections ────────────────────────────────────────────── */
+section {
+  padding: 6rem clamp(1rem, 5vw, 4rem) 4rem;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.section-label {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--teal);
+  margin-bottom: 0.75rem;
+}
+
+.section-title {
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 800;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.section-subtitle {
+  color: var(--gray-400);
+  max-width: 640px;
+  margin-bottom: 2.5rem;
+  font-size: 1.05rem;
+}
+
+/* ── Hero ────────────────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-top: 64px;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(20,184,166,0.08) 0%, transparent 100%),
+    var(--bg);
+}
+
+.hero-inner {
+  max-width: 780px;
+}
+
+.hero h1 {
+  font-size: clamp(2rem, 5.5vw, 3.6rem);
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: 1.25rem;
+  background: linear-gradient(135deg, var(--white) 0%, var(--teal) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero p {
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  color: var(--gray-400);
+  max-width: 620px;
+  margin: 0 auto 2.5rem;
+  line-height: 1.7;
+}
+
+.btn-group {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.8rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  border: none;
+  font-family: var(--font);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+.btn-primary {
+  background: var(--teal);
+  color: var(--bg);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--gray-300);
+  border: 1.5px solid var(--gray-500);
+}
+
+.btn-secondary:hover {
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+/* ── Pipeline ────────────────────────────────────────────── */
+.pipeline-section {
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(59,130,246,0.06) 0%, transparent 100%),
+    var(--bg);
+}
+
+.pipeline-track {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0;
+  margin-top: 2rem;
+}
+
+.pipeline-stage {
+  position: relative;
+  background: var(--card);
+  border: 1.5px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  padding: 1.5rem 1.2rem;
+  text-align: center;
+  min-width: 150px;
+  max-width: 180px;
+  flex: 1 1 150px;
+  transition: border-color 0.4s, box-shadow 0.4s;
+}
+
+.pipeline-stage.active {
+  border-color: var(--teal);
+  box-shadow: 0 0 24px rgba(20,184,166,0.35), inset 0 0 12px rgba(20,184,166,0.08);
+}
+
+.pipeline-stage-icon {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.pipeline-stage-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.pipeline-stage-sub {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+}
+
+.pipeline-arrow {
+  font-size: 1.4rem;
+  color: var(--gray-500);
+  margin: 0 0.25rem;
+  flex-shrink: 0;
+}
+
+@keyframes pipeline-glow {
+  0%, 100% { border-color: rgba(255,255,255,0.06); box-shadow: none; }
+  15%, 35%  { border-color: var(--teal); box-shadow: 0 0 24px rgba(20,184,166,0.35), inset 0 0 12px rgba(20,184,166,0.08); }
+}
+
+.pipeline-stage:nth-child(1)  { animation: pipeline-glow 5s ease-in-out 0s infinite; }
+.pipeline-stage:nth-child(3)  { animation: pipeline-glow 5s ease-in-out 1s infinite; }
+.pipeline-stage:nth-child(5)  { animation: pipeline-glow 5s ease-in-out 2s infinite; }
+.pipeline-stage:nth-child(7)  { animation: pipeline-glow 5s ease-in-out 3s infinite; }
+.pipeline-stage:nth-child(9)  { animation: pipeline-glow 5s ease-in-out 4s infinite; }
+
+/* ── Demo ────────────────────────────────────────────────── */
+.demo-section {
+  background: var(--bg);
+}
+
+.demo-card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 720px;
+  margin: 0 auto;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.25);
+}
+
+.demo-input-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.demo-input {
+  flex: 1;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  border: 1.5px solid rgba(255,255,255,0.1);
+  background: var(--bg);
+  color: var(--white);
+  font-size: 0.95rem;
+  font-family: var(--font);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.demo-input:focus {
+  border-color: var(--teal);
+}
+
+.demo-input::placeholder {
+  color: var(--gray-500);
+}
+
+.btn-try {
+  padding: 0.8rem 1.6rem;
+  background: var(--teal);
+  color: var(--bg);
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  font-family: var(--font);
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+
+.btn-try:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.demo-result {
+  display: none;
+}
+
+.demo-result.visible {
+  display: block;
+}
+
+.demo-answer-card {
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1rem;
+  border-left: 3px solid var(--teal);
+}
+
+.demo-answer-card h4 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--teal);
+  margin-bottom: 0.5rem;
+}
+
+.demo-answer-card p {
+  font-size: 0.95rem;
+  color: var(--gray-300);
+  line-height: 1.65;
+}
+
+.demo-modes {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.badge-keyword  { background: rgba(59,130,246,0.15); color: var(--blue); }
+.badge-vector   { background: rgba(20,184,166,0.15); color: var(--teal); }
+.badge-graph    { background: rgba(168,85,247,0.15); color: #a855f7; }
+.badge-hybrid   { background: rgba(245,158,11,0.15); color: #f59e0b; }
+
+.demo-citations h4 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--gray-400);
+  margin-bottom: 0.75rem;
+}
+
+.citation-card {
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.6rem;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.citation-card .cite-source {
+  font-size: 0.72rem;
+  color: var(--teal);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.3rem;
+}
+
+.citation-card .cite-text {
+  font-size: 0.88rem;
+  color: var(--gray-400);
+  line-height: 1.5;
+}
+
+.demo-error {
+  display: none;
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.25);
+  border-radius: 8px;
+  padding: 1rem;
+  color: #fca5a5;
+  font-size: 0.9rem;
+}
+
+.demo-error.visible {
+  display: block;
+}
+
+.demo-spinner {
+  display: none;
+  text-align: center;
+  padding: 2rem 0;
+  color: var(--gray-400);
+  font-size: 0.9rem;
+}
+
+.demo-spinner.visible {
+  display: block;
+}
+
+.demo-spinner::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.15);
+  border-top-color: var(--teal);
+  border-radius: 50%;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Benchmarks ──────────────────────────────────────────── */
+.benchmarks-section {
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(20,184,166,0.06) 0%, transparent 100%),
+    var(--bg);
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.metric-card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 1.75rem;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+
+.metric-card h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+.metric-bar-track {
+  width: 100%;
+  height: 10px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 0.6rem;
+}
+
+.metric-bar-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.metric-bar-fill.bar-teal { background: linear-gradient(90deg, var(--teal), #2dd4bf); }
+.metric-bar-fill.bar-blue { background: linear-gradient(90deg, var(--blue), #60a5fa); }
+.metric-bar-fill.bar-purple { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+.metric-bar-fill.bar-amber { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+
+.metric-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--white);
+}
+
+.metric-value .metric-max {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--gray-500);
+}
+
+/* ── Install ─────────────────────────────────────────────── */
+.install-section {
+  background: var(--bg);
+}
+
+.install-card {
+  background: var(--card);
+  border-radius: 14px;
+  max-width: 600px;
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.install-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  background: rgba(0,0,0,0.2);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.install-header span {
+  font-size: 0.75rem;
+  color: var(--gray-500);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.btn-copy {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--gray-400);
+  font-size: 0.75rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--font);
+  font-weight: 600;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.btn-copy:hover {
+  color: var(--teal);
+  border-color: var(--teal);
+}
+
+.btn-copy.copied {
+  color: var(--teal);
+  border-color: var(--teal);
+}
+
+.install-code {
+  padding: 1.5rem 1.5rem;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.95rem;
+  color: var(--teal);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.install-code .prompt {
+  color: var(--gray-500);
+  user-select: none;
+}
+
+/* ── Footer ──────────────────────────────────────────────── */
+.footer {
+  text-align: center;
+  padding: 3rem 1rem;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  color: var(--gray-500);
+  font-size: 0.85rem;
+}
+
+.footer a {
+  color: var(--teal);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+.footer p {
+  margin-top: 0.5rem;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .navbar-links {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: var(--navy);
+    flex-direction: column;
+    padding: 1rem 1.5rem 1.5rem;
+    gap: 1rem;
+    transform: translateY(-120%);
+    transition: transform 0.3s ease;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+
+  .navbar-links.open {
+    transform: translateY(0);
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .hamburger.open span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  .hamburger.open span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .hamburger.open span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  section {
+    padding: 4rem 1.25rem 3rem;
+  }
+
+  .pipeline-arrow {
+    display: none;
+  }
+
+  .pipeline-track {
+    gap: 0.75rem;
+  }
+
+  .pipeline-stage {
+    min-width: 130px;
+  }
+
+  .demo-input-row {
+    flex-direction: column;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero h1 {
+    font-size: 1.75rem;
+  }
+
+  .btn {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.88rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Navbar ────────────────────────────────────────────── -->
+<nav class="navbar" role="navigation" aria-label="Main navigation">
+  <a href="#" class="navbar-logo">AARS</a>
+  <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="navbar-links" id="navLinks">
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#how-it-works">How It Works</a></li>
+    <li><a href="#api">API</a></li>
+    <li><a href="#benchmarks">Benchmarks</a></li>
+    <li><a href="#deploy">Deploy</a></li>
+  </ul>
+</nav>
+
+<!-- ── Hero ──────────────────────────────────────────────── -->
+<section class="hero" id="overview">
+  <div class="hero-inner">
+    <h1>Retrieval That Thinks Before It Retrieves</h1>
+    <p>AARS uses LLM-based planner and reflection agents to dynamically select the optimal retrieval strategy for every query &mdash; keyword, vector, graph, or hybrid.</p>
+    <div class="btn-group">
+      <a href="https://github.com/lekhanpro/aars" class="btn btn-primary" target="_blank" rel="noopener noreferrer">View on GitHub</a>
+      <a href="#benchmarks" class="btn btn-secondary">Read the Paper</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Pipeline ──────────────────────────────────────────── -->
+<section class="pipeline-section" id="how-it-works">
+  <div class="container">
+    <span class="section-label">How It Works</span>
+    <h2 class="section-title">An Agentic Retrieval Pipeline</h2>
+    <p class="section-subtitle">Every query passes through a multi-stage pipeline where intelligent agents plan, retrieve, reflect, and fuse the optimal answer.</p>
+
+    <div class="pipeline-track">
+      <div class="pipeline-stage">
+        <span class="pipeline-stage-icon">&#9997;&#65039;</span>
+        <div class="pipeline-stage-label">User Query</div>
+        <div class="pipeline-stage-sub">Natural language input</div>
+      </div>
+      <div class="pipeline-arrow">&#8594;</div>
+      <div class="pipeline-stage">
+        <span class="pipeline-stage-icon">&#129504;</span>
+        <div class="pipeline-stage-label">Planner Agent</div>
+        <div class="pipeline-stage-sub">Strategy selection</div>
+      </div>
+      <div class="pipeline-arrow">&#8594;</div>
+      <div class="pipeline-stage">
+        <span class="pipeline-stage-icon">&#128269;</span>
+        <div class="pipeline-stage-label">Retrieval Engine</div>
+        <div class="pipeline-stage-sub">Multi-modal search</div>
+      </div>
+      <div class="pipeline-arrow">&#8594;</div>
+      <div class="pipeline-stage">
+        <span class="pipeline-stage-icon">&#128300;</span>
+        <div class="pipeline-stage-label">Reflection Agent</div>
+        <div class="pipeline-stage-sub">Quality evaluation</div>
+      </div>
+      <div class="pipeline-arrow">&#8594;</div>
+      <div class="pipeline-stage">
+        <span class="pipeline-stage-icon">&#9889;</span>
+        <div class="pipeline-stage-label">Fusion + Answer</div>
+        <div class="pipeline-stage-sub">Ranked synthesis</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Live Demo ─────────────────────────────────────────── -->
+<section class="demo-section" id="api">
+  <div class="container">
+    <span class="section-label">Live Demo</span>
+    <h2 class="section-title">Try AARS</h2>
+    <p class="section-subtitle">Send a query to the AARS API and see how the system selects retrieval modes, finds citations, and synthesizes an answer.</p>
+
+    <div class="demo-card">
+      <div class="demo-input-row">
+        <input type="text" class="demo-input" id="demoInput" placeholder="Ask a question, e.g. &quot;What causes aurora borealis?&quot;">
+        <button class="btn-try" id="demoBtn">Try It</button>
+      </div>
+      <div class="demo-spinner" id="demoSpinner">Querying AARS pipeline&hellip;</div>
+      <div class="demo-error" id="demoError"></div>
+      <div class="demo-result" id="demoResult">
+        <div class="demo-modes" id="demoModes"></div>
+        <div class="demo-answer-card">
+          <h4>Answer</h4>
+          <p id="demoAnswer"></p>
+        </div>
+        <div class="demo-citations" id="demoCitations">
+          <h4>Citations</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Benchmarks ────────────────────────────────────────── -->
+<section class="benchmarks-section" id="benchmarks">
+  <div class="container">
+    <span class="section-label">Benchmarks</span>
+    <h2 class="section-title">RAGAS Evaluation Scores</h2>
+    <p class="section-subtitle">AARS was evaluated using the RAGAS framework on a diverse question-answering benchmark, scoring high across all four core metrics.</p>
+
+    <div class="metrics-grid">
+      <div class="metric-card" data-value="87">
+        <h3>Faithfulness</h3>
+        <div class="metric-bar-track">
+          <div class="metric-bar-fill bar-teal"></div>
+        </div>
+        <div class="metric-value">0.<span class="metric-count">00</span> <span class="metric-max">/ 1.00</span></div>
+      </div>
+      <div class="metric-card" data-value="85">
+        <h3>Answer Relevancy</h3>
+        <div class="metric-bar-track">
+          <div class="metric-bar-fill bar-blue"></div>
+        </div>
+        <div class="metric-value">0.<span class="metric-count">00</span> <span class="metric-max">/ 1.00</span></div>
+      </div>
+      <div class="metric-card" data-value="84">
+        <h3>Context Precision</h3>
+        <div class="metric-bar-track">
+          <div class="metric-bar-fill bar-purple"></div>
+        </div>
+        <div class="metric-value">0.<span class="metric-count">00</span> <span class="metric-max">/ 1.00</span></div>
+      </div>
+      <div class="metric-card" data-value="80">
+        <h3>Context Recall</h3>
+        <div class="metric-bar-track">
+          <div class="metric-bar-fill bar-amber"></div>
+        </div>
+        <div class="metric-value">0.<span class="metric-count">00</span> <span class="metric-max">/ 1.00</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Quick Install ─────────────────────────────────────── -->
+<section class="install-section" id="deploy">
+  <div class="container">
+    <span class="section-label">Deploy</span>
+    <h2 class="section-title">Up and Running in Seconds</h2>
+    <p class="section-subtitle">Clone the repo and launch every service — API, vector store, graph database, and LLM gateway — with a single command.</p>
+
+    <div class="install-card">
+      <div class="install-header">
+        <span>Terminal</span>
+        <button class="btn-copy" id="copyBtn">Copy</button>
+      </div>
+      <div class="install-code"><span class="prompt">$ </span>docker compose up --build</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ────────────────────────────────────────────── -->
+<footer class="footer">
+  <a href="https://github.com/lekhanpro/aars" target="_blank" rel="noopener noreferrer">GitHub</a>
+  <p>MIT License &nbsp;|&nbsp; AARS &mdash; Agentic Adaptive Retrieval System</p>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ── Configuration ──────────────────────────────────────── */
+  var PLACEHOLDER_API_URL = "https://aars-api.example.com/api/v1/query";
+
+  /* ── Mobile nav toggle ──────────────────────────────────── */
+  var hamburger = document.getElementById("hamburger");
+  var navLinks = document.getElementById("navLinks");
+
+  hamburger.addEventListener("click", function () {
+    var isOpen = navLinks.classList.toggle("open");
+    hamburger.classList.toggle("open");
+    hamburger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  });
+
+  /* Close mobile nav on link click */
+  navLinks.querySelectorAll("a").forEach(function (link) {
+    link.addEventListener("click", function () {
+      navLinks.classList.remove("open");
+      hamburger.classList.remove("open");
+      hamburger.setAttribute("aria-expanded", "false");
+    });
+  });
+
+  /* ── Demo ────────────────────────────────────────────────── */
+  var demoBtn = document.getElementById("demoBtn");
+  var demoInput = document.getElementById("demoInput");
+  var demoSpinner = document.getElementById("demoSpinner");
+  var demoError = document.getElementById("demoError");
+  var demoResult = document.getElementById("demoResult");
+  var demoModes = document.getElementById("demoModes");
+  var demoAnswer = document.getElementById("demoAnswer");
+  var demoCitations = document.getElementById("demoCitations");
+
+  function hideAllDemoOutputs() {
+    demoSpinner.classList.remove("visible");
+    demoError.classList.remove("visible");
+    demoResult.classList.remove("visible");
+  }
+
+  function renderBadge(mode) {
+    var cls = "badge badge-" + mode.toLowerCase().replace(/[^a-z]/g, "");
+    /* Fallback class for unknown modes */
+    var knownClasses = ["keyword", "vector", "graph", "hybrid"];
+    if (knownClasses.indexOf(mode.toLowerCase()) === -1) {
+      cls = "badge badge-keyword";
+    }
+    var span = document.createElement("span");
+    span.className = cls;
+    span.textContent = mode;
+    return span;
+  }
+
+  function renderCitation(cite, index) {
+    var card = document.createElement("div");
+    card.className = "citation-card";
+    var src = document.createElement("div");
+    src.className = "cite-source";
+    src.textContent = "Source " + (index + 1) + (cite.source ? " — " + cite.source : "");
+    var txt = document.createElement("div");
+    txt.className = "cite-text";
+    txt.textContent = cite.text || cite.content || JSON.stringify(cite);
+    card.appendChild(src);
+    card.appendChild(txt);
+    return card;
+  }
+
+  demoBtn.addEventListener("click", function () {
+    var query = demoInput.value.trim();
+    if (!query) {
+      demoInput.focus();
+      return;
+    }
+
+    hideAllDemoOutputs();
+    demoSpinner.classList.add("visible");
+    demoBtn.disabled = true;
+
+    fetch(PLACEHOLDER_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: query })
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error("API returned " + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        hideAllDemoOutputs();
+
+        /* Render modes */
+        demoModes.innerHTML = "";
+        var modes = data.modes || data.retrieval_modes || ["vector"];
+        modes.forEach(function (m) {
+          demoModes.appendChild(renderBadge(m));
+        });
+
+        /* Render answer */
+        demoAnswer.textContent = data.answer || data.result || "No answer returned.";
+
+        /* Render citations */
+        /* Keep the heading, remove old citation cards */
+        var existingCards = demoCitations.querySelectorAll(".citation-card");
+        existingCards.forEach(function (c) { c.remove(); });
+
+        var citations = data.citations || data.sources || [];
+        citations.forEach(function (cite, i) {
+          demoCitations.appendChild(renderCitation(cite, i));
+        });
+
+        demoResult.classList.add("visible");
+      })
+      .catch(function (err) {
+        hideAllDemoOutputs();
+        demoError.textContent = "Request failed: " + err.message + ". Make sure the AARS API is running at " + PLACEHOLDER_API_URL;
+        demoError.classList.add("visible");
+      })
+      .finally(function () {
+        demoBtn.disabled = false;
+      });
+  });
+
+  /* Allow Enter key to submit */
+  demoInput.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") demoBtn.click();
+  });
+
+  /* ── Benchmark animated bars (Intersection Observer) ───── */
+  var metricCards = document.querySelectorAll(".metric-card");
+  var animatedCards = new Set();
+
+  function animateMetric(card) {
+    var value = parseInt(card.getAttribute("data-value"), 10);
+    var fill = card.querySelector(".metric-bar-fill");
+    var countEl = card.querySelector(".metric-count");
+
+    fill.style.width = value + "%";
+
+    /* Animate the number */
+    var start = 0;
+    var duration = 1200;
+    var startTime = null;
+
+    function step(ts) {
+      if (!startTime) startTime = ts;
+      var progress = Math.min((ts - startTime) / duration, 1);
+      /* Ease-out cubic */
+      var eased = 1 - Math.pow(1 - progress, 3);
+      var current = Math.round(eased * value);
+      countEl.textContent = String(current).padStart(2, "0");
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  var metricObserver = new IntersectionObserver(
+    function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting && !animatedCards.has(entry.target)) {
+          animatedCards.add(entry.target);
+          animateMetric(entry.target);
+        }
+      });
+    },
+    { threshold: 0.3 }
+  );
+
+  metricCards.forEach(function (card) {
+    metricObserver.observe(card);
+  });
+
+  /* ── Copy to clipboard ──────────────────────────────────── */
+  var copyBtn = document.getElementById("copyBtn");
+
+  copyBtn.addEventListener("click", function () {
+    var command = "docker compose up --build";
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(command).then(function () {
+        showCopied();
+      });
+    } else {
+      /* Fallback for older browsers */
+      var ta = document.createElement("textarea");
+      ta.value = command;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      showCopied();
+    }
+  });
+
+  function showCopied() {
+    copyBtn.textContent = "Copied!";
+    copyBtn.classList.add("copied");
+    setTimeout(function () {
+      copyBtn.textContent = "Copy";
+      copyBtn.classList.remove("copied");
+    }, 2000);
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 420" font-family="system-ui, -apple-system, sans-serif">
+  <defs>
+    <filter id="bs">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.1"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="860" height="420" rx="12" fill="#f7fafc"/>
+
+  <!-- Title -->
+  <text x="430" y="32" text-anchor="middle" font-size="17" font-weight="700" fill="#1a202c">Benchmark Results — AARS vs Baselines</text>
+  <text x="430" y="50" text-anchor="middle" font-size="11" fill="#718096">Higher is better. Evaluated on HotpotQA validation set.</text>
+
+  <!-- Y-axis -->
+  <line x1="80" y1="70" x2="80" y2="340" stroke="#cbd5e0" stroke-width="1"/>
+  <text x="70" y="75" text-anchor="end" font-size="10" fill="#a0aec0">1.0</text>
+  <line x1="75" y1="70" x2="80" y2="70" stroke="#cbd5e0" stroke-width="1"/>
+  <text x="70" y="138" text-anchor="end" font-size="10" fill="#a0aec0">0.8</text>
+  <line x1="75" y1="136" x2="830" y2="136" stroke="#edf2f7" stroke-width="1"/>
+  <text x="70" y="205" text-anchor="end" font-size="10" fill="#a0aec0">0.6</text>
+  <line x1="75" y1="203" x2="830" y2="203" stroke="#edf2f7" stroke-width="1"/>
+  <text x="70" y="273" text-anchor="end" font-size="10" fill="#a0aec0">0.4</text>
+  <line x1="75" y1="270" x2="830" y2="270" stroke="#edf2f7" stroke-width="1"/>
+  <text x="70" y="342" text-anchor="end" font-size="10" fill="#a0aec0">0.2</text>
+  <line x1="75" y1="338" x2="80" y2="338" stroke="#cbd5e0" stroke-width="1"/>
+
+  <!-- X-axis -->
+  <line x1="80" y1="340" x2="830" y2="340" stroke="#cbd5e0" stroke-width="1"/>
+
+  <!-- Bar groups — 4 metrics, 4 systems each -->
+  <!-- Heights: score * 270 from baseline y=340 -->
+  <!-- Colors: AARS=#319795, Self-RAG=#6b46c1, Hybrid=#dd6b20, Naive=#a0aec0 -->
+
+  <!-- Group 1: Faithfulness — AARS:0.87, Self:0.80, Hybrid:0.76, Naive:0.71 -->
+  <g>
+    <rect x="110" y="105.1" width="36" height="234.9" rx="3" fill="#319795" filter="url(#bs)"/>
+    <text x="128" y="99" text-anchor="middle" font-size="10" font-weight="600" fill="#319795">0.87</text>
+
+    <rect x="150" y="124" width="36" height="216" rx="3" fill="#6b46c1" filter="url(#bs)"/>
+    <text x="168" y="118" text-anchor="middle" font-size="10" font-weight="600" fill="#6b46c1">0.80</text>
+
+    <rect x="190" y="134.8" width="36" height="205.2" rx="3" fill="#dd6b20" filter="url(#bs)"/>
+    <text x="208" y="129" text-anchor="middle" font-size="10" font-weight="600" fill="#dd6b20">0.76</text>
+
+    <rect x="230" y="148.3" width="36" height="191.7" rx="3" fill="#a0aec0" filter="url(#bs)"/>
+    <text x="248" y="143" text-anchor="middle" font-size="10" font-weight="600" fill="#718096">0.71</text>
+
+    <text x="185" y="362" text-anchor="middle" font-size="12" font-weight="600" fill="#2d3748">Faithfulness</text>
+  </g>
+
+  <!-- Group 2: Answer Relevancy — AARS:0.85, Self:0.79, Hybrid:0.78, Naive:0.74 -->
+  <g>
+    <rect x="300" y="110.5" width="36" height="229.5" rx="3" fill="#319795" filter="url(#bs)"/>
+    <text x="318" y="105" text-anchor="middle" font-size="10" font-weight="600" fill="#319795">0.85</text>
+
+    <rect x="340" y="126.7" width="36" height="213.3" rx="3" fill="#6b46c1" filter="url(#bs)"/>
+    <text x="358" y="121" text-anchor="middle" font-size="10" font-weight="600" fill="#6b46c1">0.79</text>
+
+    <rect x="380" y="129.4" width="36" height="210.6" rx="3" fill="#dd6b20" filter="url(#bs)"/>
+    <text x="398" y="124" text-anchor="middle" font-size="10" font-weight="600" fill="#dd6b20">0.78</text>
+
+    <rect x="420" y="140.2" width="36" height="199.8" rx="3" fill="#a0aec0" filter="url(#bs)"/>
+    <text x="438" y="135" text-anchor="middle" font-size="10" font-weight="600" fill="#718096">0.74</text>
+
+    <text x="375" y="362" text-anchor="middle" font-size="12" font-weight="600" fill="#2d3748">Answer Relevancy</text>
+  </g>
+
+  <!-- Group 3: Context Precision — AARS:0.84, Self:0.76, Hybrid:0.73, Naive:0.68 -->
+  <g>
+    <rect x="490" y="113.2" width="36" height="226.8" rx="3" fill="#319795" filter="url(#bs)"/>
+    <text x="508" y="108" text-anchor="middle" font-size="10" font-weight="600" fill="#319795">0.84</text>
+
+    <rect x="530" y="134.8" width="36" height="205.2" rx="3" fill="#6b46c1" filter="url(#bs)"/>
+    <text x="548" y="129" text-anchor="middle" font-size="10" font-weight="600" fill="#6b46c1">0.76</text>
+
+    <rect x="570" y="142.9" width="36" height="197.1" rx="3" fill="#dd6b20" filter="url(#bs)"/>
+    <text x="588" y="137" text-anchor="middle" font-size="10" font-weight="600" fill="#dd6b20">0.73</text>
+
+    <rect x="610" y="156.4" width="36" height="183.6" rx="3" fill="#a0aec0" filter="url(#bs)"/>
+    <text x="628" y="151" text-anchor="middle" font-size="10" font-weight="600" fill="#718096">0.68</text>
+
+    <text x="565" y="362" text-anchor="middle" font-size="12" font-weight="600" fill="#2d3748">Context Precision</text>
+  </g>
+
+  <!-- Group 4: Context Recall — AARS:0.80, Self:0.71, Hybrid:0.68, Naive:0.61 -->
+  <g>
+    <rect x="680" y="124" width="36" height="216" rx="3" fill="#319795" filter="url(#bs)"/>
+    <text x="698" y="119" text-anchor="middle" font-size="10" font-weight="600" fill="#319795">0.80</text>
+
+    <rect x="720" y="148.3" width="36" height="191.7" rx="3" fill="#6b46c1" filter="url(#bs)"/>
+    <text x="738" y="143" text-anchor="middle" font-size="10" font-weight="600" fill="#6b46c1">0.71</text>
+
+    <rect x="760" y="156.4" width="36" height="183.6" rx="3" fill="#dd6b20" filter="url(#bs)"/>
+    <text x="778" y="151" text-anchor="middle" font-size="10" font-weight="600" fill="#dd6b20">0.68</text>
+
+    <rect x="800" y="175.3" width="36" height="164.7" rx="3" fill="#a0aec0" filter="url(#bs)"/>
+    <text x="818" y="170" text-anchor="middle" font-size="10" font-weight="600" fill="#718096">0.61</text>
+
+    <text x="755" y="362" text-anchor="middle" font-size="12" font-weight="600" fill="#2d3748">Context Recall</text>
+  </g>
+
+  <!-- Legend -->
+  <rect x="210" y="388" width="14" height="14" rx="3" fill="#319795"/>
+  <text x="230" y="400" font-size="12" font-weight="500" fill="#2d3748">AARS</text>
+  <rect x="310" y="388" width="14" height="14" rx="3" fill="#6b46c1"/>
+  <text x="330" y="400" font-size="12" font-weight="500" fill="#2d3748">Self-RAG</text>
+  <rect x="420" y="388" width="14" height="14" rx="3" fill="#dd6b20"/>
+  <text x="440" y="400" font-size="12" font-weight="500" fill="#2d3748">Hybrid RAG</text>
+  <rect x="550" y="388" width="14" height="14" rx="3" fill="#a0aec0"/>
+  <text x="570" y="400" font-size="12" font-weight="500" fill="#2d3748">Naive RAG</text>
+</svg>

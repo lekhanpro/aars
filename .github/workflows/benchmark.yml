@@ -1,0 +1,63 @@
+name: Weekly Benchmarks
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"  # Every Monday at 6:00 UTC
+  workflow_dispatch:  # Allow manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  benchmark:
+    name: Run Benchmarks
+    runs-on: ubuntu-latest
+    services:
+      chromadb:
+        image: chromadb/chroma:latest
+        ports:
+          - 8001:8000
+        options: >-
+          --health-cmd "curl -f http://localhost:8000/api/v1/heartbeat || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install -e ".[dev,bench]"
+          python -m spacy download en_core_web_sm
+
+      - name: Run benchmark suite
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CHROMA_HOST: localhost
+          CHROMA_PORT: 8001
+        run: |
+          python -m benchmarks.runner \
+            --datasets hotpotqa nq \
+            --max-samples 100 \
+            --output benchmarks/results.json
+
+      - name: Check for changes
+        id: changes
+        run: |
+          git diff --quiet benchmarks/results.json || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Commit updated results
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add benchmarks/results.json
+          git commit -m "chore: update benchmark results [skip ci]"
+          git push
