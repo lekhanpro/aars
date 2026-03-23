@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import copy
-from typing import Sequence
+from collections.abc import Sequence
 
 import structlog
 

@@ -74,7 +74,10 @@ class PipelineOrchestrator:
                     retriever_settings=self.settings.retriever,
                 ),
             )
-        self.registry.register("keyword", KeywordRetriever(retriever_settings=self.settings.retriever))
+        self.registry.register(
+            "keyword",
+            KeywordRetriever(retriever_settings=self.settings.retriever),
+        )
         self.registry.register("none", NoneRetriever())
         self._initialized = False
 
@@ -131,7 +134,8 @@ class PipelineOrchestrator:
                 )
 
                 # Step 3: Reflection (skip on last iteration or if disabled)
-                if not request.enable_reflection or iteration >= self.settings.pipeline.max_reflection_iterations:
+                max_iters = self.settings.pipeline.max_reflection_iterations
+                if not request.enable_reflection or iteration >= max_iters:
                     break
 
                 if plan.strategy == RetrievalStrategy.NONE:

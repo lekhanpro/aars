@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import numpy as np
-
 from src.api.schemas import Document
 from src.fusion.mmr import MaximalMarginalRelevance
 from src.fusion.rrf import ReciprocalRankFusion

@@ -160,10 +160,10 @@ class IngestionPipeline:
             ) from exc
 
         # ChromaDB has a per-call size limit; batch upserts to stay safe.
-        _CHROMA_BATCH = 512
+        chroma_batch = 512
         total = len(chunk_ids)
-        for start in range(0, total, _CHROMA_BATCH):
-            end = min(start + _CHROMA_BATCH, total)
+        for start in range(0, total, chroma_batch):
+            end = min(start + chroma_batch, total)
             try:
                 chroma_collection.upsert(
                     ids=chunk_ids[start:end],

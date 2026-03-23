@@ -117,5 +117,6 @@ class EmbeddingModel:
                 total=total,
             )
 
-        logger.info("embedding_complete", num_texts=total, num_batches=(total + batch_size - 1) // batch_size)
+        num_batches = (total + batch_size - 1) // batch_size
+        logger.info("embedding_complete", num_texts=total, num_batches=num_batches)
         return all_embeddings

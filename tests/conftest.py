@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from config.settings import Settings
-from src.api.schemas import Citation, Document, ReflectionResult, RetrievalPlan
+from src.api.schemas import Document, ReflectionResult, RetrievalPlan
 
 
 @pytest.fixture

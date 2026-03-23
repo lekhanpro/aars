@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel, Field
 
 
-class QueryType(str, Enum):
+class QueryType(StrEnum):
     FACTUAL = "factual"
     ANALYTICAL = "analytical"
     MULTI_HOP = "multi_hop"
@@ -15,13 +15,13 @@ class QueryType(str, Enum):
     CONVERSATIONAL = "conversational"
 
 
-class Complexity(str, Enum):
+class Complexity(StrEnum):
     SIMPLE = "simple"
     MODERATE = "moderate"
     COMPLEX = "complex"
 
 
-class RetrievalStrategy(str, Enum):
+class RetrievalStrategy(StrEnum):
     KEYWORD = "keyword"
     VECTOR = "vector"
     GRAPH = "graph"
