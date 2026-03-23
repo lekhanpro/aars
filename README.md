@@ -140,7 +140,7 @@ curl -X POST http://localhost:8000/api/v1/query \
 | Context Recall | **0.80** | 0.71 | 0.68 | 0.61 |
 | Avg Latency (ms) | 3,120 | 2,450 | 1,380 | 1,240 |
 
-Evaluated on HotpotQA validation set. Statistical significance confirmed via paired bootstrap resampling (p < 0.05). See [paper/](paper/) for full methodology and results.
+Evaluated on HotpotQA validation set. Statistical significance confirmed via paired bootstrap resampling (p < 0.05).
 
 ---
 
@@ -201,7 +201,6 @@ aars/
 │   ├── ablations.py             # 6 ablation configurations
 │   ├── significance.py          # Paired bootstrap resampling
 │   └── runner.py                # Benchmark orchestrator
-├── paper/                       # Springer LNCS research paper (LaTeX)
 ├── ui/app.py                    # Streamlit demo interface
 ├── tests/                       # Unit + integration tests
 ├── examples/                    # Usage examples
