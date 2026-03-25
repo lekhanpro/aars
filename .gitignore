@@ -52,14 +52,7 @@ chroma_data/
 # Benchmark results (auto-generated)
 benchmarks/results.json
 
-# LaTeX build artifacts
-paper/*.aux
-paper/*.bbl
-paper/*.blg
-paper/*.log
-paper/*.out
-paper/*.pdf
-paper/*.synctex.gz
-paper/*.toc
-paper/*.fdb_latexmk
-paper/*.fls
+# Local validation artifacts
+.playwright-cli/
+output/playwright/
+paper/

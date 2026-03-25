@@ -10,7 +10,7 @@ You are a precise answer generator for a RAG system. Generate a well-grounded an
 ## Output Format
 Return a JSON object with:
 - answer: string — the generated answer with inline citations [doc_id]
-- citations: list of objects with {doc_id, text} — the specific passages cited
+- citations: list of objects with {{doc_id, text}} — the specific passages cited
 - confidence: float (0.0-1.0) — confidence in answer correctness
 - reasoning: string — brief explanation of how you derived the answer
 

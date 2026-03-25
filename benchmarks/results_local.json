@@ -1,0 +1,291 @@
+{
+  "dataset": "local_fixture",
+  "collection": "local_fixture",
+  "num_documents": 12,
+  "num_samples": 9,
+  "systems": {
+    "aars": {
+      "name": "aars",
+      "exact_match": 1.0,
+      "token_f1": 1.0,
+      "avg_latency_ms": 1.6666666667030465,
+      "total_tokens": 5860,
+      "total_api_calls": 9,
+      "recall_at_3": 1.0,
+      "precision_at_3": 0.537037037037037,
+      "mrr_at_5": 0.9444444444444444,
+      "ndcg_at_5": 0.9589921948412731,
+      "per_sample_em": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "per_sample_f1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "aars_no_reflection": {
+      "name": "aars_no_reflection",
+      "exact_match": 1.0,
+      "token_f1": 1.0,
+      "avg_latency_ms": 1.7777777777357389,
+      "total_tokens": 3726,
+      "total_api_calls": 9,
+      "recall_at_3": 1.0,
+      "precision_at_3": 0.537037037037037,
+      "mrr_at_5": 0.9444444444444444,
+      "ndcg_at_5": 0.9589921948412731,
+      "per_sample_em": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "per_sample_f1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "naive_rag": {
+      "name": "naive_rag",
+      "exact_match": 1.0,
+      "token_f1": 1.0,
+      "avg_latency_ms": 0.0,
+      "total_tokens": 1309,
+      "total_api_calls": 11,
+      "recall_at_3": 1.0,
+      "precision_at_3": 0.4444444444444444,
+      "mrr_at_5": 0.9444444444444444,
+      "ndcg_at_5": 0.9589921948412731,
+      "per_sample_em": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "per_sample_f1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "hybrid_rag": {
+      "name": "hybrid_rag",
+      "exact_match": 1.0,
+      "token_f1": 1.0,
+      "avg_latency_ms": 0.0,
+      "total_tokens": 894,
+      "total_api_calls": 9,
+      "recall_at_3": 1.0,
+      "precision_at_3": 0.4444444444444444,
+      "mrr_at_5": 1.0,
+      "ndcg_at_5": 0.9910800876831318,
+      "per_sample_em": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "per_sample_f1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "flare": {
+      "name": "flare",
+      "exact_match": 1.0,
+      "token_f1": 1.0,
+      "avg_latency_ms": 0.0,
+      "total_tokens": 2640,
+      "total_api_calls": 27,
+      "recall_at_3": 1.0,
+      "precision_at_3": 0.4444444444444444,
+      "mrr_at_5": 0.9444444444444444,
+      "ndcg_at_5": 0.9589921948412731,
+      "per_sample_em": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "per_sample_f1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "self_rag": {
+      "name": "self_rag",
+      "exact_match": 1.0,
+      "token_f1": 1.0,
+      "avg_latency_ms": 0.0,
+      "total_tokens": 1868,
+      "total_api_calls": 18,
+      "recall_at_3": 1.0,
+      "precision_at_3": 0.4444444444444444,
+      "mrr_at_5": 0.9444444444444444,
+      "ndcg_at_5": 0.9589921948412731,
+      "per_sample_em": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "per_sample_f1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "standard_routing": {
+      "name": "standard_routing",
+      "exact_match": 1.0,
+      "token_f1": 1.0,
+      "avg_latency_ms": 0.0,
+      "total_tokens": 880,
+      "total_api_calls": 9,
+      "recall_at_3": 1.0,
+      "precision_at_3": 0.4444444444444444,
+      "mrr_at_5": 0.9444444444444444,
+      "ndcg_at_5": 0.9589921948412731,
+      "per_sample_em": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "per_sample_f1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "significance_vs_naive_rag": {
+    "aars": {
+      "p_value": 1.0,
+      "significant": false,
+      "mean_diff": 0.0,
+      "ci_lower": 0.0,
+      "ci_upper": 0.0
+    },
+    "aars_no_reflection": {
+      "p_value": 1.0,
+      "significant": false,
+      "mean_diff": 0.0,
+      "ci_lower": 0.0,
+      "ci_upper": 0.0
+    },
+    "hybrid_rag": {
+      "p_value": 1.0,
+      "significant": false,
+      "mean_diff": 0.0,
+      "ci_lower": 0.0,
+      "ci_upper": 0.0
+    },
+    "flare": {
+      "p_value": 1.0,
+      "significant": false,
+      "mean_diff": 0.0,
+      "ci_lower": 0.0,
+      "ci_upper": 0.0
+    },
+    "self_rag": {
+      "p_value": 1.0,
+      "significant": false,
+      "mean_diff": 0.0,
+      "ci_lower": 0.0,
+      "ci_upper": 0.0
+    },
+    "standard_routing": {
+      "p_value": 1.0,
+      "significant": false,
+      "mean_diff": 0.0,
+      "ci_lower": 0.0,
+      "ci_upper": 0.0
+    }
+  },
+  "markdown_table": "| System | EM | F1 | Recall@3 | Precision@3 | MRR@5 | NDCG@5 | Avg Latency (ms) |\n|--------|----|----|----------|-------------|-------|--------|------------------|\n| aars | 1.000 | 1.000 | 1.000 | 0.537 | 0.944 | 0.959 | 1.67 |\n| aars_no_reflection | 1.000 | 1.000 | 1.000 | 0.537 | 0.944 | 0.959 | 1.78 |\n| naive_rag | 1.000 | 1.000 | 1.000 | 0.444 | 0.944 | 0.959 | 0.00 |\n| hybrid_rag | 1.000 | 1.000 | 1.000 | 0.444 | 1.000 | 0.991 | 0.00 |\n| flare | 1.000 | 1.000 | 1.000 | 0.444 | 0.944 | 0.959 | 0.00 |\n| self_rag | 1.000 | 1.000 | 1.000 | 0.444 | 0.944 | 0.959 | 0.00 |\n| standard_routing | 1.000 | 1.000 | 1.000 | 0.444 | 0.944 | 0.959 | 0.00 |"
+}

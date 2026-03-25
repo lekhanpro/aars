@@ -16,7 +16,12 @@ class BaseRetriever(ABC):
     """
 
     @abstractmethod
-    async def retrieve(self, query: str, top_k: int = 10) -> list[Document]:
+    async def retrieve(
+        self,
+        query: str,
+        top_k: int = 10,
+        collection: str = "default",
+    ) -> list[Document]:
         """Return the *top_k* most relevant documents for *query*.
 
         Parameters
@@ -25,6 +30,8 @@ class BaseRetriever(ABC):
             Natural-language query string.
         top_k:
             Maximum number of documents to return.
+        collection:
+            Logical collection / corpus name to search within.
 
         Returns
         -------

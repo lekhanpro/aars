@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from contextlib import asynccontextmanager
 from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 
 import structlog
 from fastapi import FastAPI
@@ -11,6 +11,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from config.logging_config import setup_logging
 from config.settings import get_settings
+
+try:
+    import chromadb
+except ImportError:  # pragma: no cover - optional dependency
+    chromadb = None
 
 logger = structlog.get_logger()
 
@@ -27,8 +32,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # Initialize ChromaDB client
     try:
-        import chromadb
-
+        if chromadb is None:
+            raise RuntimeError("chromadb is not installed")
         chroma_client = chromadb.HttpClient(
             host=settings.chroma.host, port=settings.chroma.port
         )
@@ -41,9 +46,34 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # Initialize LLM client
     from src.llm.client import LLMClient
+    from src.ingestion.graph_builder import GraphBuilder
+    from src.ingestion.pipeline import IngestionPipeline
+    from src.pipeline.orchestrator import PipelineOrchestrator
+    from src.retrieval.graph import GraphRetriever
+    from src.retrieval.keyword import KeywordRetriever
 
     app.state.llm_client = LLMClient(
         api_key=settings.anthropic_api_key, settings=settings.llm
+    )
+    app.state.keyword_retriever = KeywordRetriever(retriever_settings=settings.retriever)
+    app.state.graph_builder = GraphBuilder()
+    await app.state.graph_builder.initialize()
+    app.state.graph_retriever = GraphRetriever(retriever_settings=settings.retriever)
+    await app.state.graph_retriever.initialize()
+    app.state.orchestrator = PipelineOrchestrator(
+        llm_client=app.state.llm_client,
+        chroma_client=app.state.chroma_client,
+        settings=settings,
+        keyword_retriever=app.state.keyword_retriever,
+        graph_retriever=app.state.graph_retriever,
+    )
+    app.state.ingestion_pipeline = IngestionPipeline(
+        chroma_client=app.state.chroma_client,
+        settings=settings,
+    ).attach_runtime(
+        keyword_retriever=app.state.keyword_retriever,
+        graph_builder=app.state.graph_builder,
+        graph_retriever=app.state.graph_retriever,
     )
 
     yield

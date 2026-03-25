@@ -72,31 +72,43 @@ class FusionPipeline:
         log.info("fusion_pipeline.start")
 
         # Stage 1: Reciprocal Rank Fusion
-        merged = self._rrf.fuse(result_lists)
+        merged = self.merge(result_lists)
         if not merged:
             log.info("fusion_pipeline.empty_after_rrf")
             return []
 
         log.info("fusion_pipeline.rrf_complete", merged_count=len(merged))
 
-        # Align doc_embeddings with the merged order.  If the caller
-        # provided fewer embeddings than merged docs (e.g. embeddings
-        # only for a subset), we truncate to the common length.
-        usable = min(len(merged), len(doc_embeddings))
+        result = self.rerank_merged(
+            merged_documents=merged,
+            query_embedding=query_embedding,
+            doc_embeddings=doc_embeddings,
+        )
+
+        log.info("fusion_pipeline.complete", result_count=len(result))
+        return result
+
+    def merge(self, result_lists: list[list[Document]]) -> list[Document]:
+        """Merge ranked lists with reciprocal-rank fusion."""
+        return self._rrf.fuse(result_lists)
+
+    def rerank_merged(
+        self,
+        merged_documents: list[Document],
+        query_embedding: list[float],
+        doc_embeddings: list[list[float]],
+    ) -> list[Document]:
+        """Apply MMR to an already merged document list."""
+        usable = min(len(merged_documents), len(doc_embeddings))
         if usable == 0:
-            log.warning("fusion_pipeline.no_embeddings_for_mmr")
-            return merged[: self._final_top_k]
+            logger.warning("fusion_pipeline.no_embeddings_for_mmr")
+            return merged_documents[: self._final_top_k]
 
-        merged_subset = merged[:usable]
+        merged_subset = merged_documents[:usable]
         embeddings_subset = doc_embeddings[:usable]
-
-        # Stage 2: Maximal Marginal Relevance
-        result = self._mmr.rerank(
+        return self._mmr.rerank(
             documents=merged_subset,
             query_embedding=query_embedding,
             doc_embeddings=embeddings_subset,
             top_k=self._final_top_k,
         )
-
-        log.info("fusion_pipeline.complete", result_count=len(result))
-        return result

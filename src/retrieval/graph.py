@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 import networkx as nx
@@ -12,6 +13,19 @@ from src.api.schemas.common import Document
 from src.retrieval.base import BaseRetriever
 
 logger: structlog.stdlib.BoundLogger = structlog.get_logger(__name__)
+_IGNORED_ENTITY_WORDS = {
+    "a",
+    "an",
+    "how",
+    "in",
+    "the",
+    "what",
+    "when",
+    "where",
+    "which",
+    "who",
+    "why",
+}
 
 
 class GraphRetriever(BaseRetriever):
@@ -36,22 +50,23 @@ class GraphRetriever(BaseRetriever):
 
     def __init__(self, retriever_settings: RetrieverSettings | None = None) -> None:
         self._settings = retriever_settings or RetrieverSettings()
-        self._graph: nx.DiGraph | None = None
+        self._graphs: dict[str, nx.DiGraph] = {}
         self._nlp: Any = None  # spacy.Language — loaded lazily
 
     # ------------------------------------------------------------------
     # Graph management
     # ------------------------------------------------------------------
 
-    def set_graph(self, graph: nx.DiGraph) -> None:
+    def set_graph(self, graph: nx.DiGraph, collection: str = "default") -> None:
         """Assign the shared entity-relationship graph.
 
         This is expected to be called at application startup (or whenever
         the graph is rebuilt by the ingestion layer).
         """
-        self._graph = graph
+        self._graphs[collection] = graph
         logger.info(
             "graph_retriever.set_graph",
+            collection=collection,
             nodes=graph.number_of_nodes(),
             edges=graph.number_of_edges(),
         )
@@ -62,21 +77,28 @@ class GraphRetriever(BaseRetriever):
 
     async def initialize(self) -> None:
         """Load the spaCy NLP model (small English pipeline)."""
-        import spacy  # deferred import to keep startup fast when not needed
-
         model_name = "en_core_web_sm"
         try:
+            import spacy  # deferred import to keep startup fast when not needed
+
             self._nlp = spacy.load(model_name)
         except OSError:
             logger.warning(
                 "graph_retriever.spacy_model_missing",
                 model=model_name,
-                hint="Run: python -m spacy download en_core_web_sm",
+                hint="Falling back to simple entity extraction",
             )
-            raise RuntimeError(
-                f"spaCy model '{model_name}' not found. "
-                f"Install it with: python -m spacy download {model_name}"
-            ) from None
+            self._nlp = None
+            return
+        except Exception as exc:
+            logger.warning(
+                "graph_retriever.spacy_unavailable",
+                model=model_name,
+                error=str(exc),
+                hint="Falling back to simple entity extraction",
+            )
+            self._nlp = None
+            return
 
         logger.info("graph_retriever.initialized", spacy_model=model_name)
 
@@ -84,7 +106,12 @@ class GraphRetriever(BaseRetriever):
     # Retrieval
     # ------------------------------------------------------------------
 
-    async def retrieve(self, query: str, top_k: int | None = None) -> list[Document]:
+    async def retrieve(
+        self,
+        query: str,
+        top_k: int | None = None,
+        collection: str = "default",
+    ) -> list[Document]:
         """Extract entities from *query*, traverse the graph, return documents.
 
         Parameters
@@ -95,11 +122,6 @@ class GraphRetriever(BaseRetriever):
             Maximum number of documents.  Falls back to
             ``RetrieverSettings.graph_top_k``.
         """
-        if self._nlp is None:
-            raise RuntimeError(
-                "GraphRetriever has not been initialised. Call initialize() first."
-            )
-
         effective_top_k = top_k if top_k is not None else self._settings.graph_top_k
         max_hops: int = self._settings.graph_max_hops
 
@@ -114,10 +136,12 @@ class GraphRetriever(BaseRetriever):
             query=query[:120],
             entities=entities,
             max_hops=max_hops,
+            collection=collection,
         )
 
         # 2. Traverse the graph -----------------------------------------------
-        if self._graph is None or self._graph.number_of_nodes() == 0:
+        graph = self._graphs.get(collection)
+        if graph is None or graph.number_of_nodes() == 0:
             logger.debug("graph_retriever.empty_graph")
             return []
 
@@ -127,13 +151,13 @@ class GraphRetriever(BaseRetriever):
 
         for entity in entities:
             normalised = entity.lower()
-            if normalised not in self._graph:
+            if normalised not in graph:
                 continue
 
-            visited = self._bfs(normalised, max_hops)
+            visited = self._bfs(graph, normalised, max_hops)
 
             for node in visited:
-                node_data: dict[str, Any] = self._graph.nodes[node]
+                node_data: dict[str, Any] = graph.nodes[node]
                 node_doc_ids: list[str] = node_data.get("doc_ids", [])
                 node_documents: dict[str, Document] = node_data.get("documents", {})
 
@@ -183,6 +207,9 @@ class GraphRetriever(BaseRetriever):
 
     def _extract_entities(self, text: str) -> list[str]:
         """Return deduplicated entity strings from *text* via spaCy NER."""
+        if self._nlp is None:
+            return self._simple_entities(text)
+
         doc = self._nlp(text)
         seen: set[str] = set()
         entities: list[str] = []
@@ -194,12 +221,28 @@ class GraphRetriever(BaseRetriever):
                     entities.append(normalised)
         return entities
 
-    def _bfs(self, start_node: str, max_hops: int) -> set[str]:
+    def _simple_entities(self, text: str) -> list[str]:
+        """Fallback entity extraction based on title-cased and all-caps phrases."""
+        pattern = re.compile(
+            r"\b(?:[A-Z][a-zA-Z-]*|[A-Z]{2,})(?:\s+(?:[A-Z][a-zA-Z-]*|[A-Z]{2,}))*\b"
+        )
+        seen: set[str] = set()
+        entities: list[str] = []
+        for match in pattern.finditer(text):
+            entity = match.group(0).strip()
+            normalized = re.sub(r"^(?:The|A|An)\s+", "", entity, flags=re.IGNORECASE).strip()
+            if not normalized or normalized.lower() in _IGNORED_ENTITY_WORDS:
+                continue
+            if normalized.lower() not in seen:
+                seen.add(normalized.lower())
+                entities.append(normalized)
+        return entities
+
+    def _bfs(self, graph: nx.DiGraph, start_node: str, max_hops: int) -> set[str]:
         """Breadth-first traversal up to *max_hops* from *start_node*.
 
         Returns the set of all visited nodes (including *start_node*).
         """
-        assert self._graph is not None
         visited: set[str] = {start_node}
         frontier: set[str] = {start_node}
 
@@ -207,10 +250,10 @@ class GraphRetriever(BaseRetriever):
             next_frontier: set[str] = set()
             for node in frontier:
                 # Follow both outgoing and incoming edges.
-                for neighbour in self._graph.successors(node):
+                for neighbour in graph.successors(node):
                     if neighbour not in visited:
                         next_frontier.add(neighbour)
-                for neighbour in self._graph.predecessors(node):
+                for neighbour in graph.predecessors(node):
                     if neighbour not in visited:
                         next_frontier.add(neighbour)
             if not next_frontier:

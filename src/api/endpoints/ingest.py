@@ -5,7 +5,6 @@ from __future__ import annotations
 from fastapi import APIRouter, File, Form, Request, UploadFile
 
 from src.api.schemas import ErrorResponse, IngestResponse
-from src.ingestion.pipeline import IngestionPipeline
 
 router = APIRouter()
 
@@ -23,11 +22,7 @@ async def ingest(
     chunk_overlap: int | None = Form(default=None),
 ) -> IngestResponse:
     """Upload and index documents."""
-    pipeline = IngestionPipeline(
-        chroma_client=request.app.state.chroma_client,
-        settings=request.app.state.settings,
-    )
-    return await pipeline.ingest(
+    return await request.app.state.ingestion_pipeline.ingest(
         file=file,
         collection=collection,
         chunk_size=chunk_size,

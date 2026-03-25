@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import structlog
 
 from src.api.schemas.common import Document, ReflectionResult
-from src.llm.client import LLMClient
+
+if TYPE_CHECKING:
+    from src.llm.client import LLMClient
 
 logger = structlog.get_logger()
 

@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import structlog
 from pydantic import BaseModel, Field
 
 from src.api.schemas.common import Citation, Document
-from src.llm.client import LLMClient
+
+if TYPE_CHECKING:
+    from src.llm.client import LLMClient
 
 logger = structlog.get_logger()
 

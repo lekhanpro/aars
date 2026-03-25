@@ -61,8 +61,8 @@ ui = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-asyncio_mode = "auto"
 markers = [
+    "asyncio: marks tests that run in an asyncio event loop",
     "integration: marks tests as integration tests",
 ]
 

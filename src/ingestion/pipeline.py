@@ -9,10 +9,14 @@ import structlog
 from fastapi import UploadFile
 
 from config.settings import Settings
+from src.api.schemas.common import Document
 from src.api.schemas.responses import IngestResponse
+from src.ingestion.graph_builder import GraphBuilder
 from src.ingestion.chunkers.recursive import RecursiveChunker
 from src.ingestion.loaders.pdf_loader import PDFLoader
 from src.ingestion.loaders.text_loader import TextLoader
+from src.retrieval.graph import GraphRetriever
+from src.retrieval.keyword import KeywordRetriever
 from src.utils.embeddings import EmbeddingModel
 
 logger = structlog.get_logger(__name__)
@@ -49,6 +53,22 @@ class IngestionPipeline:
     def __init__(self, chroma_client: object | None, settings: Settings) -> None:
         self._chroma_client = chroma_client
         self._settings = settings
+        self._keyword_retriever: KeywordRetriever | None = None
+        self._graph_builder: GraphBuilder | None = None
+        self._graph_retriever: GraphRetriever | None = None
+
+    def attach_runtime(
+        self,
+        *,
+        keyword_retriever: KeywordRetriever | None = None,
+        graph_builder: GraphBuilder | None = None,
+        graph_retriever: GraphRetriever | None = None,
+    ) -> IngestionPipeline:
+        """Attach shared runtime services used during ingestion."""
+        self._keyword_retriever = keyword_retriever
+        self._graph_builder = graph_builder
+        self._graph_retriever = graph_retriever
+        return self
 
     # ------------------------------------------------------------------
     # Public API
@@ -141,9 +161,18 @@ class IngestionPipeline:
 
         logger.info("embeddings_generated", filename=filename, num_embeddings=len(embeddings))
 
-        # ---- 5. Store in ChromaDB --------------------------------------
         chunk_ids = [str(uuid4()) for _ in all_chunks]
         metadatas = [c["metadata"] for c in all_chunks]
+        chunk_documents = [
+            Document(
+                id=chunk_id,
+                content=chunk["content"],
+                metadata=chunk["metadata"],
+            )
+            for chunk_id, chunk in zip(chunk_ids, all_chunks, strict=True)
+        ]
+
+        # ---- 5. Store in ChromaDB --------------------------------------
 
         try:
             chroma_collection = self._chroma_client.get_or_create_collection(  # type: ignore[union-attr]
@@ -189,6 +218,17 @@ class IngestionPipeline:
             collection=collection,
             chunks_stored=total,
         )
+
+        # ---- 6. Update in-memory retrievers -----------------------------
+        if self._keyword_retriever is not None:
+            self._keyword_retriever.add_documents(chunk_documents, collection=collection)
+
+        if self._graph_builder is not None and self._graph_retriever is not None:
+            self._graph_builder.add_documents(chunk_documents, collection=collection)
+            self._graph_retriever.set_graph(
+                self._graph_builder.get_graph(collection),
+                collection=collection,
+            )
 
         return IngestResponse(
             collection=collection,

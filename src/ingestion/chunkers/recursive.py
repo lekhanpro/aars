@@ -159,6 +159,16 @@ class RecursiveChunker:
             space_idx = overlap_text.find(" ")
             if space_idx != -1:
                 overlap_text = overlap_text[space_idx + 1:]
+            if overlap_text:
+                max_length = self._chunk_size + min(self._chunk_overlap, 10)
+                allowed_overlap = max_length - len(merged[i]) - 1
+                if allowed_overlap <= 0:
+                    overlap_text = ""
+                elif len(overlap_text) > allowed_overlap:
+                    overlap_text = overlap_text[-allowed_overlap:].lstrip()
+                    space_idx = overlap_text.find(" ")
+                    if space_idx != -1:
+                        overlap_text = overlap_text[space_idx + 1:]
             combined = overlap_text + " " + merged[i] if overlap_text else merged[i]
             overlapped.append(combined)
 

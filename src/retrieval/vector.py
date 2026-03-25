@@ -4,8 +4,12 @@ from __future__ import annotations
 
 from typing import Any
 
-import chromadb
 import structlog
+
+try:
+    import chromadb
+except ImportError:
+    chromadb = Any  # type: ignore[assignment]
 
 from config.settings import ChromaSettings, EmbeddingSettings, RetrieverSettings
 from src.api.schemas.common import Document
@@ -29,14 +33,16 @@ class VectorRetriever(BaseRetriever):
         chroma_settings: ChromaSettings | None = None,
         embedding_settings: EmbeddingSettings | None = None,
         retriever_settings: RetrieverSettings | None = None,
+        chroma_client: Any | None = None,
     ) -> None:
         self._chroma_settings = chroma_settings or ChromaSettings()
         self._embedding_settings = embedding_settings or EmbeddingSettings()
         self._retriever_settings = retriever_settings or RetrieverSettings()
+        self._provided_client = chroma_client
 
         self._embedding_model: EmbeddingModel | None = None
-        self._client: chromadb.ClientAPI | None = None
-        self._collection: chromadb.Collection | None = None
+        self._client: Any | None = None
+        self._collections: dict[str, Any] = {}
 
     # ------------------------------------------------------------------
     # Lifecycle
@@ -54,25 +60,38 @@ class VectorRetriever(BaseRetriever):
         self._embedding_model = EmbeddingModel.get(self._embedding_settings.model)
 
         # ChromaDB connection
-        self._client = chromadb.HttpClient(
-            host=self._chroma_settings.host,
-            port=self._chroma_settings.port,
-        )
-        self._collection = self._client.get_or_create_collection(
+        if self._provided_client is not None:
+            self._client = self._provided_client
+        else:
+            if chromadb is Any:
+                raise RuntimeError(
+                    "chromadb is required for vector retrieval when no custom client is provided."
+                )
+            self._client = chromadb.HttpClient(
+                host=self._chroma_settings.host,
+                port=self._chroma_settings.port,
+            )
+        default_collection = self._client.get_or_create_collection(
             name=self._chroma_settings.collection_name,
             metadata={"hnsw:space": "cosine"},
         )
+        self._collections[self._chroma_settings.collection_name] = default_collection
         logger.info(
             "vector_retriever.ready",
             collection=self._chroma_settings.collection_name,
-            count=self._collection.count(),
+            count=default_collection.count(),
         )
 
     # ------------------------------------------------------------------
     # Retrieval
     # ------------------------------------------------------------------
 
-    async def retrieve(self, query: str, top_k: int | None = None) -> list[Document]:
+    async def retrieve(
+        self,
+        query: str,
+        top_k: int | None = None,
+        collection: str = "default",
+    ) -> list[Document]:
         """Embed *query* and return the closest documents from ChromaDB.
 
         Parameters
@@ -81,25 +100,46 @@ class VectorRetriever(BaseRetriever):
             Natural-language query.
         top_k:
             Number of results.  Falls back to ``RetrieverSettings.top_k``.
+        collection:
+            Chroma collection to query. Falls back to the configured default
+            collection when omitted or empty.
         """
-        if self._collection is None or self._embedding_model is None:
+        if self._client is None or self._embedding_model is None:
             raise RuntimeError(
                 "VectorRetriever has not been initialised. Call initialize() first."
             )
 
         effective_top_k = top_k if top_k is not None else self._retriever_settings.top_k
+        collection_name = collection or self._chroma_settings.collection_name
+        chroma_collection = self._get_collection(collection_name)
 
-        logger.debug("vector_retriever.query", query=query[:120], top_k=effective_top_k)
+        logger.debug(
+            "vector_retriever.query",
+            query=query[:120],
+            top_k=effective_top_k,
+            collection=collection_name,
+        )
 
         query_embedding = self._embedding_model.embed([query])[0]
 
-        results: dict[str, Any] = self._collection.query(
+        results: dict[str, Any] = chroma_collection.query(
             query_embeddings=[query_embedding],
             n_results=effective_top_k,
             include=["documents", "metadatas", "distances"],
         )
 
         return self._parse_results(results)
+
+    def _get_collection(self, name: str) -> Any:
+        """Return a cached Chroma collection handle."""
+        if self._client is None:
+            raise RuntimeError("VectorRetriever has not been initialised.")
+        if name not in self._collections:
+            self._collections[name] = self._client.get_or_create_collection(
+                name=name,
+                metadata={"hnsw:space": "cosine"},
+            )
+        return self._collections[name]
 
     # ------------------------------------------------------------------
     # Helpers

@@ -33,7 +33,9 @@ class TraceRecorder:
         self.total_api_calls += 1
 
     def finalize(self) -> PipelineTrace:
-        total_ms = (time.monotonic() - self._start_time) * 1000
+        elapsed_ms = (time.monotonic() - self._start_time) * 1000
+        recorded_ms = sum(step.duration_ms for step in self.steps)
+        total_ms = max(elapsed_ms, recorded_ms)
         trace = PipelineTrace(
             trace_id=self.trace_id,
             steps=self.steps,

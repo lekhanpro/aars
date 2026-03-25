@@ -17,7 +17,12 @@ logger: structlog.stdlib.BoundLogger = structlog.get_logger(__name__)
 class NoneRetriever(BaseRetriever):
     """Retriever that always returns an empty document list."""
 
-    async def retrieve(self, query: str, top_k: int = 10) -> list[Document]:
+    async def retrieve(
+        self,
+        query: str,
+        top_k: int = 10,
+        collection: str = "default",
+    ) -> list[Document]:
         """Return an empty list — no retrieval needed."""
-        logger.debug("none_retriever.skip", query=query[:120])
+        logger.debug("none_retriever.skip", query=query[:120], collection=collection)
         return []

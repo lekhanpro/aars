@@ -2,12 +2,47 @@
 
 from __future__ import annotations
 
+import hashlib
+import math
+import re
 import threading
 from typing import ClassVar
 
+import numpy as np
 import structlog
 
 logger = structlog.get_logger(__name__)
+
+_TOKEN_RE = re.compile(r"[a-z0-9]+")
+
+
+class _HashingSentenceTransformer:
+    """Deterministic lightweight fallback when sentence-transformers is unavailable."""
+
+    def __init__(self, dimensions: int = 256) -> None:
+        self._dimensions = dimensions
+
+    def encode(
+        self,
+        texts: list[str],
+        show_progress_bar: bool = False,
+        convert_to_numpy: bool = True,
+    ) -> np.ndarray:
+        del show_progress_bar
+        del convert_to_numpy
+        rows: list[list[float]] = []
+        for text in texts:
+            vector = [0.0] * self._dimensions
+            for token in _TOKEN_RE.findall(text.lower()):
+                digest = hashlib.sha256(token.encode("utf-8")).digest()
+                index = int.from_bytes(digest[:4], "big") % self._dimensions
+                sign = 1.0 if digest[4] % 2 == 0 else -1.0
+                vector[index] += sign
+            norm = math.sqrt(sum(value * value for value in vector))
+            if norm:
+                vector = [value / norm for value in vector]
+            rows.append(vector)
+        return np.array(rows, dtype=np.float64)
 
 
 class EmbeddingModel:
@@ -30,15 +65,29 @@ class EmbeddingModel:
         try:
             from sentence_transformers import SentenceTransformer
         except ImportError as exc:
-            logger.error("sentence_transformers_not_installed")
-            raise RuntimeError(
-                "sentence-transformers is required for embeddings. "
-                "Install it with: pip install sentence-transformers"
-            ) from exc
+            logger.warning(
+                "sentence_transformers_not_installed",
+                model=model_name,
+                fallback="hashing",
+            )
+            self._model_name = model_name
+            self._model = _HashingSentenceTransformer()
+            return
 
         self._model_name = model_name
         logger.info("embedding_model_loading", model=model_name)
-        self._model = SentenceTransformer(model_name)
+        try:
+            self._model = SentenceTransformer(model_name)
+        except Exception as exc:
+            logger.warning(
+                "embedding_model_fallback",
+                model=model_name,
+                error=str(exc),
+                fallback="hashing",
+            )
+            self._model_name = model_name
+            self._model = _HashingSentenceTransformer()
+            return
         logger.info("embedding_model_loaded", model=model_name)
 
     # ------------------------------------------------------------------
