@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 620" font-family="system-ui, -apple-system, sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#718096"/>
+    </marker>
+    <marker id="arr-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#319795"/>
+    </marker>
+    <filter id="sh">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="960" height="620" rx="12" fill="#f7fafc"/>
+  <text x="480" y="32" text-anchor="middle" font-size="18" font-weight="700" fill="#1a202c">AARS System Architecture</text>
+
+  <!-- === Client Layer === -->
+  <rect x="30" y="50" width="900" height="70" rx="10" fill="#ebf8ff" stroke="#90cdf4" stroke-width="1" filter="url(#sh)"/>
+  <text x="480" y="72" text-anchor="middle" font-size="12" font-weight="600" fill="#2b6cb0">CLIENT LAYER</text>
+  <rect x="60" y="82" width="120" height="30" rx="6" fill="#2b6cb0"/>
+  <text x="120" y="102" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Streamlit UI</text>
+  <rect x="200" y="82" width="120" height="30" rx="6" fill="#2b6cb0"/>
+  <text x="260" y="102" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">cURL / HTTP</text>
+  <rect x="340" y="82" width="120" height="30" rx="6" fill="#2b6cb0"/>
+  <text x="400" y="102" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Jupyter</text>
+
+  <!-- Arrow down -->
+  <line x1="480" y1="120" x2="480" y2="148" stroke="#718096" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- === API Layer === -->
+  <rect x="30" y="150" width="900" height="80" rx="10" fill="#f0fff4" stroke="#9ae6b4" stroke-width="1" filter="url(#sh)"/>
+  <text x="480" y="172" text-anchor="middle" font-size="12" font-weight="600" fill="#276749">FASTAPI LAYER (src/api/)</text>
+  <rect x="60" y="184" width="155" height="32" rx="6" fill="#38a169"/>
+  <text x="137" y="205" text-anchor="middle" font-size="10" font-weight="600" fill="#fff">POST /api/v1/query</text>
+  <rect x="230" y="184" width="155" height="32" rx="6" fill="#38a169"/>
+  <text x="307" y="205" text-anchor="middle" font-size="10" font-weight="600" fill="#fff">POST /api/v1/ingest</text>
+  <rect x="400" y="184" width="155" height="32" rx="6" fill="#38a169"/>
+  <text x="477" y="205" text-anchor="middle" font-size="10" font-weight="600" fill="#fff">GET /api/v1/health</text>
+  <rect x="570" y="184" width="170" height="32" rx="6" fill="#38a169"/>
+  <text x="655" y="205" text-anchor="middle" font-size="10" font-weight="600" fill="#fff">GET /api/v1/debug/trace</text>
+
+  <!-- Arrow down -->
+  <line x1="480" y1="230" x2="480" y2="258" stroke="#718096" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- === Pipeline Layer === -->
+  <rect x="30" y="260" width="900" height="140" rx="10" fill="#faf5ff" stroke="#d6bcfa" stroke-width="1" filter="url(#sh)"/>
+  <text x="480" y="282" text-anchor="middle" font-size="12" font-weight="600" fill="#6b46c1">PIPELINE ORCHESTRATOR (src/pipeline/)</text>
+
+  <!-- Pipeline boxes -->
+  <rect x="50" y="296" width="145" height="50" rx="8" fill="#6b46c1"/>
+  <text x="122" y="318" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Planner Agent</text>
+  <text x="122" y="334" text-anchor="middle" font-size="9" fill="#e9d8fd">src/agents/planner</text>
+
+  <rect x="210" y="296" width="145" height="50" rx="8" fill="#6b46c1"/>
+  <text x="282" y="318" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Retrieval Layer</text>
+  <text x="282" y="334" text-anchor="middle" font-size="9" fill="#e9d8fd">src/retrieval/</text>
+
+  <rect x="370" y="296" width="155" height="50" rx="8" fill="#6b46c1"/>
+  <text x="447" y="318" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Reflection Agent</text>
+  <text x="447" y="334" text-anchor="middle" font-size="9" fill="#e9d8fd">src/agents/reflection</text>
+
+  <rect x="540" y="296" width="145" height="50" rx="8" fill="#6b46c1"/>
+  <text x="612" y="318" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">RRF + MMR</text>
+  <text x="612" y="334" text-anchor="middle" font-size="9" fill="#e9d8fd">src/fusion/</text>
+
+  <rect x="700" y="296" width="155" height="50" rx="8" fill="#6b46c1"/>
+  <text x="777" y="318" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Answer Generator</text>
+  <text x="777" y="334" text-anchor="middle" font-size="9" fill="#e9d8fd">src/generation/</text>
+
+  <!-- Pipeline flow arrows -->
+  <line x1="195" y1="321" x2="208" y2="321" stroke="#d6bcfa" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="355" y1="321" x2="368" y2="321" stroke="#d6bcfa" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="525" y1="321" x2="538" y2="321" stroke="#d6bcfa" stroke-width="2" marker-end="url(#arr)"/>
+  <line x1="685" y1="321" x2="698" y2="321" stroke="#d6bcfa" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Trace -->
+  <rect x="50" y="360" width="140" height="28" rx="6" fill="#e9d8fd" stroke="#b794f4" stroke-width="1"/>
+  <text x="120" y="379" text-anchor="middle" font-size="10" font-weight="500" fill="#553c9a">Pipeline Trace</text>
+
+  <!-- === Data Layer === -->
+  <rect x="30" y="420" width="900" height="80" rx="10" fill="#fffaf0" stroke="#fbd38d" stroke-width="1" filter="url(#sh)"/>
+  <text x="480" y="442" text-anchor="middle" font-size="12" font-weight="600" fill="#c05621">DATA STORES</text>
+
+  <rect x="60" y="456" width="170" height="34" rx="8" fill="#dd6b20"/>
+  <text x="145" y="478" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">ChromaDB (Vectors)</text>
+
+  <rect x="250" y="456" width="170" height="34" rx="8" fill="#dd6b20"/>
+  <text x="335" y="478" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">BM25 Index (Memory)</text>
+
+  <rect x="440" y="456" width="180" height="34" rx="8" fill="#dd6b20"/>
+  <text x="530" y="478" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">NetworkX Graph (NER)</text>
+
+  <!-- Arrow pipeline→data -->
+  <line x1="282" y1="346" x2="282" y2="418" stroke="#718096" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <text x="288" y="388" font-size="9" fill="#718096">retrieve</text>
+
+  <!-- === External Services === -->
+  <rect x="30" y="520" width="900" height="80" rx="10" fill="#fff5f5" stroke="#feb2b2" stroke-width="1" filter="url(#sh)"/>
+  <text x="480" y="542" text-anchor="middle" font-size="12" font-weight="600" fill="#c53030">EXTERNAL SERVICES</text>
+
+  <rect x="60" y="556" width="200" height="34" rx="8" fill="#e53e3e"/>
+  <text x="160" y="578" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">Anthropic Claude API</text>
+
+  <rect x="280" y="556" width="200" height="34" rx="8" fill="#e53e3e"/>
+  <text x="380" y="578" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">sentence-transformers</text>
+
+  <rect x="500" y="556" width="200" height="34" rx="8" fill="#e53e3e"/>
+  <text x="600" y="578" text-anchor="middle" font-size="11" font-weight="600" fill="#fff">spaCy NER (en_core)</text>
+
+  <!-- Arrows pipeline→external -->
+  <line x1="122" y1="346" x2="122" y2="410" stroke="#319795" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <line x1="122" y1="410" x2="122" y2="418" stroke="#319795" stroke-width="1.5"/>
+  <line x1="160" y1="500" x2="160" y2="554" stroke="#718096" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <text x="166" y="530" font-size="9" fill="#718096">LLM calls</text>
+
+  <line x1="380" y1="500" x2="380" y2="554" stroke="#718096" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <text x="386" y="530" font-size="9" fill="#718096">embeddings</text>
+
+  <line x1="530" y1="500" x2="600" y2="554" stroke="#718096" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <text x="575" y="530" font-size="9" fill="#718096">entity extraction</text>
+</svg>

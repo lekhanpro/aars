@@ -1,48 +1,66 @@
 # AARS
 
-Agentic Adaptive Retrieval System: a query-aware RAG backend that plans before retrieving, can retry retrieval through reflection, and now has a reproducible checked-in benchmark.
+Adaptive multi-strategy RAG backend with planner, reflection, fusion, and a reproducible offline benchmark.
+
+AARS treats retrieval as a query-time decision instead of a fixed pipeline. It can plan before retrieving, switch between keyword, vector, graph, or hybrid retrieval, reflect on whether the evidence is sufficient, then fuse and rerank before answer generation.
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-14222b?style=flat-square)](https://lekhanpro.github.io/aars/)
+[![Benchmark](https://img.shields.io/badge/benchmark-local_fixture-115e59?style=flat-square)](https://github.com/lekhanpro/aars/tree/main/benchmarks)
 [![License: MIT](https://img.shields.io/badge/License-MIT-22c55e?style=flat-square)](LICENSE)
+
+Documentation site: [lekhanpro.github.io/aars](https://lekhanpro.github.io/aars/)
 
 ![AARS Pipeline](assets/aars-pipeline.svg)
 
-## What is implemented
+## How It Works
 
-The checked-in project now supports a real end-to-end runtime path instead of disconnected components:
+1. `Plan` classifies the query and selects `keyword`, `vector`, `graph`, `hybrid`, or `none`.
+2. `Retrieve` runs the selected retrievers against the requested collection.
+3. `Reflect` checks whether the current evidence is sufficient to answer.
+4. `Retry` can revise query and strategy when retrieval is not good enough.
+5. `Fuse` merges ranked lists with reciprocal-rank fusion and optionally reranks with MMR.
+6. `Generate` returns grounded answers with citations, documents, confidence, and optional trace data.
 
-- shared startup services for the orchestrator, ingestion pipeline, keyword retriever, and graph retriever
-- collection-aware vector, keyword, and graph retrieval
-- ingestion that updates Chroma-compatible storage, BM25 state, and the entity graph together
-- planner, reflection, fusion, and MMR toggles in the query request schema
-- deterministic fallback embeddings when `sentence-transformers` is not installed
-- deterministic fallback entity extraction when spaCy or `en_core_web_sm` is not installed
-- a runnable offline benchmark in `benchmarks/runner.py` with checked-in results in `benchmarks/results_local.json`
+## Why AARS Instead Of Fixed-Pipeline RAG?
 
-## Architecture
+Traditional RAG stacks usually force one retrieval mode onto every question. AARS is built around the idea that factual, semantic, and multi-hop questions should not all be handled the same way.
 
-At query time AARS runs this loop:
+![AARS vs Existing RAG](assets/aars-vs-rag.svg)
 
-1. planner chooses `keyword`, `vector`, `graph`, `hybrid`, or `none`
-2. one or more retrievers run against the requested collection
-3. reflection decides whether the evidence is sufficient
-4. retrieval can retry with a revised strategy
-5. reciprocal-rank fusion merges result lists
-6. MMR reranks for diversity before grounded answer generation
+- Query planning is request-aware instead of hard-coded.
+- Retrieval is collection-aware across vector, keyword, and graph state.
+- Reflection can trigger another retrieval round instead of answering from weak context.
+- Fusion and MMR are first-class parts of the runtime path, not presentation-layer claims.
 
-The API returns the answer, citations, retrieved documents, retrieval plan, reflection results, and an optional execution trace.
+## System Architecture
 
-## Reproducible benchmark
+The checked-in runtime is actually wired end to end: startup builds the shared orchestrator, ingestion updates all retrievers for the target collection, and query execution reuses shared state instead of rebuilding components per request.
 
-The only checked-in benchmark result in this repository is the local offline fixture benchmark. It is small by design and exists to be rerunnable without network access or external APIs.
+![AARS System Architecture](assets/architecture.svg)
 
-- documents: 12
-- questions: 9
-- systems compared: AARS, AARS without reflection, NaiveRAG, HybridRAG, FLARE-style, Self-RAG-style, StandardRouting
-- results file: `benchmarks/results_local.json`
+### Implemented Runtime Capabilities
 
-### Current benchmark summary
+- Shared startup services for orchestrator, ingestion pipeline, keyword retriever, and graph retriever.
+- Collection-aware vector, keyword, and graph retrieval.
+- Planner, reflection, fusion, MMR, keyword, graph, and default-strategy toggles in the query schema.
+- Deterministic hashing embeddings fallback when `sentence-transformers` is unavailable.
+- Deterministic entity-extraction fallback when spaCy or `en_core_web_sm` is unavailable.
+- A real offline benchmark runner in [`benchmarks/runner.py`](benchmarks/runner.py) with checked-in fixture data and results.
+
+## Reproducible Local Benchmark
+
+This repository does not claim an external public benchmark result. The checked-in benchmark is the local offline fixture only, designed for reproducibility and regression testing.
+
+![AARS Local Benchmark](assets/benchmarks.svg)
+
+- Documents: `12`
+- Questions: `9`
+- Systems: `AARS`, `AARS without reflection`, `NaiveRAG`, `HybridRAG`, `FLARE-style`, `Self-RAG-style`, `StandardRouting`
+- Result file: [`benchmarks/results_local.json`](benchmarks/results_local.json)
+
+### Current Benchmark Summary
 
 | System | EM | F1 | Recall@3 | Precision@3 | MRR@5 | NDCG@5 | Avg Latency (ms) |
 |--------|----|----|----------|-------------|-------|--------|------------------|
@@ -54,20 +72,17 @@ The only checked-in benchmark result in this repository is the local offline fix
 | Self-RAG-style | 1.000 | 1.000 | 1.000 | 0.444 | 0.944 | 0.959 | 0.00 |
 | StandardRouting | 1.000 | 1.000 | 1.000 | 0.444 | 0.944 | 0.959 | 0.00 |
 
-These numbers are from the local fixture only. They are useful for regression checking and verifying the retrieval pipeline, but they are not a substitute for large external QA benchmarks.
-Latency values are in-process measurements on the local machine and should be treated as relative rather than portable.
+Latency values are local in-process measurements and will vary by machine and run. The ranking metrics and answer metrics are the stable part of this fixture.
 
-### Run the benchmark
+### Run The Benchmark
 
 ```bash
 python benchmarks/runner.py --output benchmarks/results_local.json
 ```
 
-The runner prints a markdown table and writes a JSON report with per-system metrics and significance-test scaffolding.
+## Quick Start
 
-## Quick start
-
-### 1. Install
+### Install
 
 ```bash
 git clone https://github.com/lekhanpro/aars.git
@@ -75,17 +90,15 @@ cd aars
 pip install -e ".[dev,ui]"
 ```
 
-### 2. Optional runtime extras
-
-These improve retrieval quality but are no longer hard requirements for basic local benchmarking:
+### Optional Runtime Extras
 
 ```bash
 python -m spacy download en_core_web_sm
 ```
 
-If `sentence-transformers` is missing, AARS falls back to a deterministic hashing embedder. If spaCy or the English model is missing, graph extraction falls back to a simple capitalized-entity heuristic.
+If `sentence-transformers` is missing, AARS falls back to deterministic hashing embeddings. If spaCy is missing, graph extraction falls back to a simple heuristic instead of failing outright.
 
-### 3. Start Chroma and the API
+### Start Chroma And The API
 
 ```bash
 cp .env.example .env
@@ -95,35 +108,35 @@ docker run -p 8001:8000 chromadb/chroma:latest
 uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### 4. Ingest a document
+### Ingest A Document
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/ingest ^
-  -F "file=@my_document.txt" ^
+curl -X POST http://localhost:8000/api/v1/ingest \
+  -F "file=@my_document.txt" \
   -F "collection=demo"
 ```
 
-### 5. Query AARS
+### Query AARS
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/query ^
-  -H "Content-Type: application/json" ^
-  -d "{
-    \"query\": \"What sparse ranking algorithm rewards exact term overlap?\",
-    \"collection\": \"demo\",
-    \"top_k\": 5,
-    \"enable_planner\": true,
-    \"enable_reflection\": true,
-    \"enable_fusion\": true,
-    \"enable_mmr\": true,
-    \"enable_keyword\": true,
-    \"enable_graph\": true,
-    \"default_strategy\": \"vector\",
-    \"enable_trace\": true
-  }"
+curl -X POST http://localhost:8000/api/v1/query \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "What sparse ranking algorithm rewards exact term overlap?",
+    "collection": "demo",
+    "top_k": 5,
+    "enable_planner": true,
+    "enable_reflection": true,
+    "enable_fusion": true,
+    "enable_mmr": true,
+    "enable_keyword": true,
+    "enable_graph": true,
+    "default_strategy": "vector",
+    "enable_trace": true
+  }'
 ```
 
-## API surface
+## API Surface
 
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
@@ -134,30 +147,16 @@ curl -X POST http://localhost:8000/api/v1/query ^
 | `DELETE` | `/api/v1/collections/{name}` | Delete a collection |
 | `GET` | `/api/v1/debug/trace/{id}` | Fetch a stored execution trace |
 
-## Project layout
+## Project Layout
 
 ```text
 aars/
+├── assets/
 ├── benchmarks/
-│   ├── baselines.py
-│   ├── datasets.py
-│   ├── local_fixture.py
-│   ├── metrics.py
-│   ├── results_local.json
-│   ├── runner.py
-│   └── significance.py
 ├── config/
-│   ├── prompts/
-│   └── settings.py
+├── docs/
+├── examples/
 ├── src/
-│   ├── agents/
-│   ├── api/
-│   ├── fusion/
-│   ├── generation/
-│   ├── ingestion/
-│   ├── pipeline/
-│   ├── retrieval/
-│   └── utils/
 ├── tests/
 ├── ui/
 └── README.md
@@ -165,23 +164,16 @@ aars/
 
 ## Development
 
-Basic verification:
-
 ```bash
 python -m compileall src benchmarks tests examples ui config scripts
+pytest -q
 ```
 
-If `pytest` is installed in the environment:
+## Current Limitations
 
-```bash
-pytest
-```
-
-## Current limitations
-
-- answer generation in the API still depends on an Anthropic-compatible key for live use
-- the checked-in reproducible benchmark is a local fixture, not HotpotQA or another external dataset
-- external dataset loader code still exists under `benchmarks/datasets.py`, but there are no checked-in public results for those datasets
+- Live answer generation still depends on an Anthropic-compatible key.
+- The reproducible benchmark is local-fixture only, not HotpotQA or another external public dataset.
+- `paper/main.pdf` may still exist locally if Windows has it locked open, but it is ignored and no longer part of the tracked project surface.
 
 ## License
 

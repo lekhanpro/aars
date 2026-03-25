@@ -4,15 +4,15 @@ const samples = [
     label: "BM25",
     question: "What sparse ranking algorithm rewards exact term overlap?",
     answer: "BM25.",
-    badges: ["strategy: keyword", "type: factual", "answer target: exact term overlap"],
+    badges: ["strategy: keyword", "type: factual", "target: lexical overlap"],
     docs: ["bm25"],
   },
   {
     id: "q_chroma",
-    label: "Chroma",
+    label: "ChromaDB",
     question: "Which component in AARS stores dense embeddings for semantic search?",
     answer: "ChromaDB.",
-    badges: ["strategy: vector", "type: analytical", "answer target: dense storage"],
+    badges: ["strategy: vector", "type: analytical", "target: dense retrieval"],
     docs: ["chroma"],
   },
   {
@@ -20,7 +20,7 @@ const samples = [
     label: "BERT",
     question: "Who introduced the architecture used by BERT?",
     answer: "Ashish Vaswani and colleagues.",
-    badges: ["strategy: graph", "type: multi-hop", "answer target: linked architecture history"],
+    badges: ["strategy: graph", "type: multi-hop", "target: linked entities"],
     docs: ["transformer_history", "bert_architecture"],
   },
   {
@@ -28,7 +28,7 @@ const samples = [
     label: "HQ city",
     question: "In which city is the company led by Sam Altman headquartered?",
     answer: "San Francisco.",
-    badges: ["strategy: graph", "type: multi-hop", "answer target: CEO -> company -> city"],
+    badges: ["strategy: graph", "type: multi-hop", "target: CEO -> company -> city"],
     docs: ["openai_ceo", "openai_hq"],
   },
   {
@@ -36,7 +36,7 @@ const samples = [
     label: "Fusion",
     question: "Which method merges ranked lists before MMR reranking?",
     answer: "Reciprocal Rank Fusion, or RRF.",
-    badges: ["strategy: hybrid", "type: analytical", "answer target: fusion step"],
+    badges: ["strategy: hybrid", "type: analytical", "target: fusion"],
     docs: ["rrf", "mmr"],
   },
 ];
@@ -47,22 +47,24 @@ function renderSampleButtons() {
     return;
   }
 
+  mount.innerHTML = "";
   samples.forEach((sample, index) => {
     const button = document.createElement("button");
-    button.className = "sample-chip";
     button.type = "button";
+    button.className = "sample-chip";
     button.textContent = sample.label;
     button.dataset.sampleId = sample.id;
     button.addEventListener("click", () => selectSample(sample.id));
-    mount.appendChild(button);
     if (index === 0) {
       button.classList.add("is-active");
     }
+    mount.appendChild(button);
   });
 }
 
 function selectSample(id) {
   const sample = samples.find((item) => item.id === id) || samples[0];
+
   document.querySelectorAll(".sample-chip").forEach((button) => {
     button.classList.toggle("is-active", button.dataset.sampleId === sample.id);
   });
@@ -124,8 +126,8 @@ function setupCopyButtons() {
   });
 }
 
-function setupMobileNav() {
-  const toggle = document.querySelector("[data-menu-toggle]");
+function setupNav() {
+  const toggle = document.querySelector("[data-nav-toggle]");
   const nav = document.querySelector("[data-nav]");
   if (!toggle || !nav) {
     return;
@@ -139,4 +141,4 @@ function setupMobileNav() {
 renderSampleButtons();
 selectSample(samples[0].id);
 setupCopyButtons();
-setupMobileNav();
+setupNav();

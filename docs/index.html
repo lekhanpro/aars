@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AARS | Adaptive Retrieval That Actually Ships</title>
+  <title>AARS | Adaptive Retrieval That Plans First</title>
   <meta
     name="description"
-    content="AARS is an adaptive retrieval system for RAG with planner, reflection, collection-aware retrieval, and a reproducible offline benchmark."
+    content="AARS is an adaptive RAG backend with planner, reflection, keyword-vector-graph retrieval, and a reproducible offline benchmark."
   >
   <link
     rel="icon"
@@ -15,475 +15,328 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Sora:wght@400;600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;700;800&display=swap"
     rel="stylesheet"
   >
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <div class="site-bg" aria-hidden="true"></div>
   <header class="topbar">
     <a class="brand" href="#top">AARS</a>
-    <button class="menu-toggle" type="button" aria-label="Toggle navigation" data-menu-toggle>
+    <button class="nav-toggle" type="button" aria-label="Toggle navigation" data-nav-toggle>
       Menu
     </button>
     <nav class="nav" data-nav>
-      <a href="#capabilities">Capabilities</a>
-      <a href="#explorer">Explorer</a>
+      <a href="#how">How It Works</a>
+      <a href="#compare">Why AARS</a>
       <a href="#benchmark">Benchmark</a>
-      <a href="#ship">Ship It</a>
-      <a href="#limits">Limits</a>
+      <a href="#quickstart">Quick Start</a>
+      <a href="#samples">Samples</a>
     </nav>
   </header>
 
   <main>
     <section class="hero" id="top">
-      <div class="shell hero-grid">
+      <div class="container hero-grid">
         <div class="hero-copy">
-          <p class="eyebrow">Checked-in benchmark. Real runtime wiring. No fake demo dependency.</p>
-          <h1>Adaptive retrieval that plans, retries, and cites before it answers.</h1>
-          <p class="lede">
-            AARS is a query-aware RAG backend that chooses retrieval strategy per request,
-            re-checks evidence through reflection, and fuses keyword, vector, and graph results
-            into grounded answers. The benchmark in this repo is reproducible offline and the
-            runtime path is actually wired end to end.
+          <div class="badge-row">
+            <span class="badge">Python 3.11+</span>
+            <span class="badge">FastAPI</span>
+            <span class="badge">Local benchmark</span>
+            <span class="badge">MIT</span>
+          </div>
+          <h1>Adaptive retrieval that plans before it retrieves.</h1>
+          <p class="hero-text">
+            AARS is a query-aware RAG backend that selects retrieval strategy per question, checks
+            whether the evidence is sufficient, and fuses keyword, vector, and graph results before
+            answer generation.
           </p>
-          <div class="hero-actions">
-            <a class="button button-primary" href="https://github.com/lekhanpro/aars">View Repository</a>
-            <a class="button button-secondary" href="#benchmark">See Local Benchmark</a>
-            <a class="button button-ghost" href="https://github.com/lekhanpro/aars/blob/main/README.md">Read README</a>
-          </div>
-          <ul class="hero-facts">
-            <li>Collection-aware vector, keyword, and graph retrieval</li>
-            <li>Planner, reflection, fusion, and MMR toggles exposed in the API</li>
-            <li>Deterministic fallbacks when spaCy, sentence-transformers, or external APIs are missing</li>
-          </ul>
-        </div>
-
-        <aside class="hero-panel">
-          <div class="panel-card panel-card-strong">
-            <div class="terminal-head">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-            <div class="terminal-body">
-              <p><span>$</span> query: "Who introduced the architecture used by BERT?"</p>
-              <p><span>&gt;</span> planner selected <strong>graph</strong></p>
-              <p><span>&gt;</span> retrievers used <strong>graph + reflection</strong></p>
-              <p><span>&gt;</span> fused evidence from <strong>2 cited docs</strong></p>
-              <p><span>&gt;</span> answer: <strong>Ashish Vaswani and colleagues</strong></p>
-            </div>
-          </div>
-
-          <div class="metrics-grid">
-            <article class="metric-card">
-              <p class="metric-label">Benchmark EM</p>
-              <p class="metric-value">1.000</p>
-              <p class="metric-note">local fixture</p>
-            </article>
-            <article class="metric-card">
-              <p class="metric-label">Benchmark F1</p>
-              <p class="metric-value">1.000</p>
-              <p class="metric-note">9 checked-in questions</p>
-            </article>
-            <article class="metric-card">
-              <p class="metric-label">Collections</p>
-              <p class="metric-value">aware</p>
-              <p class="metric-note">vector + keyword + graph</p>
-            </article>
-            <article class="metric-card">
-              <p class="metric-label">Fallback Mode</p>
-              <p class="metric-value">offline</p>
-              <p class="metric-note">hash embeddings + simple entities</p>
-            </article>
-          </div>
-        </aside>
-      </div>
-    </section>
-
-    <section class="section" id="capabilities">
-      <div class="shell">
-        <div class="section-head">
-          <p class="eyebrow">Capabilities</p>
-          <h2>Built to avoid fixed-pipeline RAG failure modes.</h2>
-          <p class="section-copy">
-            The repo now matches the architecture it describes. These are implemented
-            runtime behaviors, not presentation-layer claims.
+          <p class="hero-subtext">
+            No fake hosted demo. No fake benchmark claims. The runtime path and the benchmark in
+            this repository are both real and rerunnable.
           </p>
+          <div class="cta-row">
+            <a class="button button-primary" href="https://github.com/lekhanpro/aars">View on GitHub</a>
+            <a class="button button-secondary" href="#quickstart">Start Locally</a>
+          </div>
+          <div class="mini-stats">
+            <article>
+              <strong>1.000</strong>
+              <span>EM on local fixture</span>
+            </article>
+            <article>
+              <strong>1.000</strong>
+              <span>F1 on local fixture</span>
+            </article>
+            <article>
+              <strong>4 modes</strong>
+              <span>keyword, vector, graph, hybrid</span>
+            </article>
+          </div>
         </div>
 
-        <div class="card-grid">
-          <article class="info-card">
-            <p class="card-kicker">01</p>
-            <h3>Planner-backed strategy selection</h3>
-            <p>
-              Queries can route into keyword, vector, graph, hybrid, or none, with request-level
-              toggles and deterministic fallback planning when live LLM planning is disabled.
-            </p>
-          </article>
-          <article class="info-card">
-            <p class="card-kicker">02</p>
-            <h3>Shared ingestion and query runtime</h3>
-            <p>
-              Startup now builds a shared orchestrator plus ingestion pipeline so collections update
-              Chroma-compatible storage, BM25 state, and graph state together.
-            </p>
-          </article>
-          <article class="info-card">
-            <p class="card-kicker">03</p>
-            <h3>Reflection before final answering</h3>
-            <p>
-              AARS can evaluate evidence sufficiency, retry retrieval with a revised strategy, then
-              continue into fusion and grounded answer generation.
-            </p>
-          </article>
-          <article class="info-card">
-            <p class="card-kicker">04</p>
-            <h3>Reproducible offline benchmark</h3>
-            <p>
-              The checked-in benchmark is small by design: 12 local documents, 9 questions, 7
-              systems, no dataset download, no hosted services required.
-            </p>
-          </article>
-          <article class="info-card">
-            <p class="card-kicker">05</p>
-            <h3>Graceful dependency fallback</h3>
-            <p>
-              If sentence-transformers or spaCy are unavailable, the repo still runs with hashing
-              embeddings and lightweight entity extraction instead of crashing.
-            </p>
-          </article>
-          <article class="info-card">
-            <p class="card-kicker">06</p>
-            <h3>Debuggable outputs</h3>
-            <p>
-              Query responses can include the retrieval plan, reflection steps, returned documents,
-              citations, and a bounded execution trace.
-            </p>
-          </article>
-        </div>
-
-        <div class="pipeline-layout">
-          <div class="pipeline-column">
-            <p class="eyebrow">Pipeline</p>
-            <h3 class="subhead">What happens per query</h3>
-            <ol class="pipeline-list">
-              <li>
-                <strong>Plan</strong>
-                <span>Choose retrieval strategy from the query itself, or use a deterministic fallback.</span>
-              </li>
-              <li>
-                <strong>Retrieve</strong>
-                <span>Run vector, keyword, graph, or hybrid retrieval against the selected collection.</span>
-              </li>
-              <li>
-                <strong>Reflect</strong>
-                <span>Check whether the current evidence is sufficient before spending another answer call.</span>
-              </li>
-              <li>
-                <strong>Fuse</strong>
-                <span>Merge ranked lists with reciprocal rank fusion and optionally rerank with MMR.</span>
-              </li>
-              <li>
-                <strong>Generate</strong>
-                <span>Return an answer with citations, confidence, documents, and optional trace output.</span>
-              </li>
-            </ol>
-          </div>
-
-          <div class="pipeline-art" aria-hidden="true">
-            <div class="art-frame">
-              <div class="art-node">query</div>
-              <div class="art-arrow"></div>
-              <div class="art-node">plan</div>
-              <div class="art-arrow"></div>
-              <div class="art-node">retrieve</div>
-              <div class="art-loop">reflection loop</div>
-              <div class="art-arrow"></div>
-              <div class="art-node">fuse</div>
-              <div class="art-arrow"></div>
-              <div class="art-node">answer</div>
-            </div>
-          </div>
+        <div class="hero-figure">
+          <img src="./assets/aars-pipeline.svg" alt="AARS pipeline diagram">
         </div>
       </div>
     </section>
 
-    <section class="section section-accent" id="explorer">
-      <div class="shell explorer-grid">
-        <div class="section-head">
-          <p class="eyebrow">Explorer</p>
-          <h2>A static demo that actually works on GitHub Pages.</h2>
-          <p class="section-copy">
-            The old page tried to call a placeholder hosted API. This one ships a browser-side
-            sample explorer built from the checked-in local benchmark fixture, so the page remains
-            useful even without a deployed backend.
-          </p>
-          <div class="sample-list" data-sample-list></div>
+    <section class="section" id="how">
+      <div class="container section-grid">
+        <div class="section-copy">
+          <p class="eyebrow">How It Works</p>
+          <h2>Planning, reflection, and fusion are part of the runtime, not marketing copy.</h2>
+          <ol class="step-list">
+            <li>
+              <strong>Plan</strong>
+              <span>Classify the query and choose keyword, vector, graph, hybrid, or none.</span>
+            </li>
+            <li>
+              <strong>Retrieve</strong>
+              <span>Run collection-aware retrieval across the configured stores.</span>
+            </li>
+            <li>
+              <strong>Reflect</strong>
+              <span>Check evidence sufficiency before answering from weak context.</span>
+            </li>
+            <li>
+              <strong>Retry</strong>
+              <span>Revise query and strategy when the first pass is not enough.</span>
+            </li>
+            <li>
+              <strong>Fuse</strong>
+              <span>Merge ranked lists with reciprocal-rank fusion and optionally rerank with MMR.</span>
+            </li>
+            <li>
+              <strong>Generate</strong>
+              <span>Return answer, citations, documents, confidence, and trace data.</span>
+            </li>
+          </ol>
         </div>
 
-        <div class="sample-panel">
-          <div class="sample-header">
-            <p class="sample-label">Sample query</p>
-            <p class="sample-id" data-sample-display-id></p>
-          </div>
-          <h3 data-sample-question></h3>
-          <p class="sample-answer" data-sample-answer></p>
-          <div class="sample-badges" data-sample-badges></div>
-          <div class="sample-docs">
-            <p class="sample-docs-title">Relevant fixture documents</p>
-            <ul data-sample-docs></ul>
+        <div class="panel">
+          <img src="./assets/architecture.svg" alt="AARS architecture overview">
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-contrast" id="compare">
+      <div class="container compare-grid">
+        <div class="panel panel-light">
+          <img src="./assets/aars-vs-rag.svg" alt="AARS versus existing RAG systems">
+        </div>
+        <div class="section-copy section-copy-light">
+          <p class="eyebrow">Why AARS</p>
+          <h2>Fixed-pipeline RAG is the wrong abstraction for mixed question types.</h2>
+          <div class="feature-stack">
+            <article>
+              <h3>Query-aware strategy selection</h3>
+              <p>
+                Factual questions, semantic questions, and multi-hop questions do not get forced
+                through the same retriever path.
+              </p>
+            </article>
+            <article>
+              <h3>Shared runtime state</h3>
+              <p>
+                Startup initializes shared orchestrator, ingestion, keyword, and graph state so the
+                API does not rebuild core components per request.
+              </p>
+            </article>
+            <article>
+              <h3>Real fallback behavior</h3>
+              <p>
+                Sentence-transformers and spaCy are optional. AARS still runs with deterministic
+                hashing embeddings and lightweight entity extraction.
+              </p>
+            </article>
+            <article>
+              <h3>Grounded outputs</h3>
+              <p>
+                Query responses can include citations, documents, plan, reflection results, and a
+                bounded execution trace.
+              </p>
+            </article>
           </div>
         </div>
       </div>
     </section>
 
     <section class="section" id="benchmark">
-      <div class="shell">
-        <div class="section-head">
+      <div class="container benchmark-grid">
+        <div class="section-copy">
           <p class="eyebrow">Benchmark</p>
-          <h2>Real numbers from the checked-in local fixture.</h2>
-          <p class="section-copy">
-            This repo does not claim HotpotQA or any other external public benchmark result. The
-            table below is generated from <code>benchmarks/results_local.json</code> and exists for
-            regression checking, not leaderboard theater.
+          <h2>A reproducible local benchmark, not a hand-waved leaderboard claim.</h2>
+          <p>
+            The checked-in benchmark is the local offline fixture only: 12 documents, 9 questions,
+            7 systems, and no external dataset download. It exists for regression checking and for
+            proving the retrieval runtime actually works.
           </p>
+          <div class="callout-list">
+            <div>Result file: <code>benchmarks/results_local.json</code></div>
+            <div>Stable metrics: EM, F1, Recall@3, Precision@3, MRR@5, NDCG@5</div>
+            <div>Latency is local-machine dependent and can move between runs</div>
+          </div>
         </div>
 
-        <div class="summary-strip">
-          <article class="summary-card">
-            <p class="summary-kicker">Dataset</p>
-            <h3>local_fixture</h3>
-            <p>12 documents, 9 questions, deterministic offline runner.</p>
-          </article>
-          <article class="summary-card">
-            <p class="summary-kicker">AARS</p>
-            <h3>EM 1.000</h3>
-            <p>F1 1.000, Recall@3 1.000, Precision@3 0.537.</p>
-          </article>
-          <article class="summary-card">
-            <p class="summary-kicker">Validation</p>
-            <h3>63 tests</h3>
-            <p>Local test suite passes along with benchmark rerun.</p>
-          </article>
+        <div class="panel">
+          <img src="./assets/benchmarks.svg" alt="AARS local fixture benchmark summary">
         </div>
+      </div>
 
-        <div class="table-wrap">
-          <table class="benchmark-table">
-            <thead>
-              <tr>
-                <th>System</th>
-                <th>EM</th>
-                <th>F1</th>
-                <th>Recall@3</th>
-                <th>Precision@3</th>
-                <th>MRR@5</th>
-                <th>NDCG@5</th>
-                <th>Avg Latency (ms)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="highlight-row">
-                <td>AARS</td>
-                <td>1.000</td>
-                <td>1.000</td>
-                <td>1.000</td>
-                <td>0.537</td>
-                <td>0.944</td>
-                <td>0.959</td>
-                <td>1.67</td>
-              </tr>
-              <tr>
-                <td>AARS no reflection</td>
-                <td>1.000</td>
-                <td>1.000</td>
-                <td>1.000</td>
-                <td>0.537</td>
-                <td>0.944</td>
-                <td>0.959</td>
-                <td>1.78</td>
-              </tr>
-              <tr>
-                <td>NaiveRAG</td>
-                <td>1.000</td>
-                <td>1.000</td>
-                <td>1.000</td>
-                <td>0.444</td>
-                <td>0.944</td>
-                <td>0.959</td>
-                <td>0.00</td>
-              </tr>
-              <tr>
-                <td>HybridRAG</td>
-                <td>1.000</td>
-                <td>1.000</td>
-                <td>1.000</td>
-                <td>0.444</td>
-                <td>1.000</td>
-                <td>0.991</td>
-                <td>0.00</td>
-              </tr>
-              <tr>
-                <td>FLARE-style</td>
-                <td>1.000</td>
-                <td>1.000</td>
-                <td>1.000</td>
-                <td>0.444</td>
-                <td>0.944</td>
-                <td>0.959</td>
-                <td>0.00</td>
-              </tr>
-              <tr>
-                <td>Self-RAG-style</td>
-                <td>1.000</td>
-                <td>1.000</td>
-                <td>1.000</td>
-                <td>0.444</td>
-                <td>0.944</td>
-                <td>0.959</td>
-                <td>0.00</td>
-              </tr>
-              <tr>
-                <td>StandardRouting</td>
-                <td>1.000</td>
-                <td>1.000</td>
-                <td>1.000</td>
-                <td>0.444</td>
-                <td>0.944</td>
-                <td>0.959</td>
-                <td>0.00</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <div class="container table-shell">
+        <table class="metric-table">
+          <thead>
+            <tr>
+              <th>System</th>
+              <th>EM</th>
+              <th>F1</th>
+              <th>Recall@3</th>
+              <th>Precision@3</th>
+              <th>MRR@5</th>
+              <th>NDCG@5</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="is-highlight">
+              <td>AARS</td>
+              <td>1.000</td>
+              <td>1.000</td>
+              <td>1.000</td>
+              <td>0.537</td>
+              <td>0.944</td>
+              <td>0.959</td>
+            </tr>
+            <tr>
+              <td>AARS no reflection</td>
+              <td>1.000</td>
+              <td>1.000</td>
+              <td>1.000</td>
+              <td>0.537</td>
+              <td>0.944</td>
+              <td>0.959</td>
+            </tr>
+            <tr>
+              <td>NaiveRAG</td>
+              <td>1.000</td>
+              <td>1.000</td>
+              <td>1.000</td>
+              <td>0.444</td>
+              <td>0.944</td>
+              <td>0.959</td>
+            </tr>
+            <tr>
+              <td>HybridRAG</td>
+              <td>1.000</td>
+              <td>1.000</td>
+              <td>1.000</td>
+              <td>0.444</td>
+              <td>1.000</td>
+              <td>0.991</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
-    <section class="section section-deep" id="ship">
-      <div class="shell ship-grid">
-        <div>
-          <p class="eyebrow">Ship It</p>
-          <h2>Quick start without guessing what still works.</h2>
-          <p class="section-copy">
-            The repo supports three practical paths: run the benchmark, start the API, or launch
-            the Streamlit UI against a local backend.
-          </p>
+    <section class="section section-soft" id="quickstart">
+      <div class="container">
+        <div class="section-copy narrow">
+          <p class="eyebrow">Quick Start</p>
+          <h2>Install it, benchmark it, run it.</h2>
+        </div>
 
-          <div class="code-card">
-            <div class="code-card-head">
-              <p>Run the offline benchmark</p>
-              <button class="copy-button" type="button" data-copy-target="benchmark-command">Copy</button>
+        <div class="code-grid">
+          <article class="code-card">
+            <div class="code-head">
+              <h3>Install</h3>
+              <button class="copy-button" type="button" data-copy-target="install-code">Copy</button>
             </div>
-            <pre id="benchmark-command">python benchmarks/runner.py --output benchmarks/results_local.json</pre>
-          </div>
+            <pre id="install-code">git clone https://github.com/lekhanpro/aars.git
+cd aars
+pip install -e ".[dev,ui]"</pre>
+          </article>
 
-          <div class="code-card">
-            <div class="code-card-head">
-              <p>Start the API locally</p>
-              <button class="copy-button" type="button" data-copy-target="api-command">Copy</button>
+          <article class="code-card">
+            <div class="code-head">
+              <h3>Run benchmark</h3>
+              <button class="copy-button" type="button" data-copy-target="benchmark-code">Copy</button>
             </div>
-            <pre id="api-command">docker run -p 8001:8000 chromadb/chroma:latest
+            <pre id="benchmark-code">python benchmarks/runner.py --output benchmarks/results_local.json</pre>
+          </article>
+
+          <article class="code-card">
+            <div class="code-head">
+              <h3>Start API</h3>
+              <button class="copy-button" type="button" data-copy-target="api-code">Copy</button>
+            </div>
+            <pre id="api-code">docker run -p 8001:8000 chromadb/chroma:latest
 uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload</pre>
-          </div>
+          </article>
 
-          <div class="code-card">
-            <div class="code-card-head">
-              <p>Launch the UI</p>
-              <button class="copy-button" type="button" data-copy-target="ui-command">Copy</button>
+          <article class="code-card">
+            <div class="code-head">
+              <h3>Query example</h3>
+              <button class="copy-button" type="button" data-copy-target="query-code">Copy</button>
             </div>
-            <pre id="ui-command">set AARS_API_URL=http://localhost:8000
-streamlit run ui/app.py</pre>
-          </div>
-        </div>
-
-        <div class="endpoint-panel">
-          <p class="eyebrow">API surface</p>
-          <div class="endpoint-list">
-            <article>
-              <span class="verb verb-post">POST</span>
-              <div>
-                <h3>/api/v1/ingest</h3>
-                <p>Load a text or PDF file into a target collection and update all retrievers.</p>
-              </div>
-            </article>
-            <article>
-              <span class="verb verb-post">POST</span>
-              <div>
-                <h3>/api/v1/query</h3>
-                <p>Run planning, retrieval, reflection, fusion, reranking, and answer generation.</p>
-              </div>
-            </article>
-            <article>
-              <span class="verb verb-get">GET</span>
-              <div>
-                <h3>/api/v1/health</h3>
-                <p>Report API version and current Chroma connectivity state.</p>
-              </div>
-            </article>
-            <article>
-              <span class="verb verb-get">GET</span>
-              <div>
-                <h3>/api/v1/collections</h3>
-                <p>List available collections for the currently configured Chroma backend.</p>
-              </div>
-            </article>
-            <article>
-              <span class="verb verb-delete">DELETE</span>
-              <div>
-                <h3>/api/v1/collections/{name}</h3>
-                <p>Delete a collection when the backend is available.</p>
-              </div>
-            </article>
-          </div>
+            <pre id="query-code">curl -X POST http://localhost:8000/api/v1/query \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "What sparse ranking algorithm rewards exact term overlap?",
+    "collection": "demo",
+    "top_k": 5,
+    "enable_planner": true,
+    "enable_reflection": true,
+    "enable_fusion": true,
+    "enable_mmr": true,
+    "enable_keyword": true,
+    "enable_graph": true,
+    "enable_trace": true
+  }'</pre>
+          </article>
         </div>
       </div>
     </section>
 
-    <section class="section" id="limits">
-      <div class="shell">
-        <div class="section-head">
-          <p class="eyebrow">Current limits</p>
-          <h2>What this repo still does not claim.</h2>
+    <section class="section" id="samples">
+      <div class="container sample-layout">
+        <div class="section-copy">
+          <p class="eyebrow">Sample Questions</p>
+          <h2>Examples from the checked-in fixture benchmark.</h2>
+          <p>
+            This is a static explorer built from local fixture data so the page still works on
+            GitHub Pages without a live backend.
+          </p>
+          <div class="chip-row" data-sample-list></div>
         </div>
 
-        <div class="limit-grid">
-          <article class="limit-card">
-            <h3>No external benchmark claims</h3>
-            <p>
-              The checked-in result is the local fixture benchmark only. That is intentional, and
-              the page now says so plainly.
-            </p>
-          </article>
-          <article class="limit-card">
-            <h3>No fake hosted live demo</h3>
-            <p>
-              GitHub Pages is static. This site now ships a working sample explorer instead of
-              pretending a public API endpoint exists.
-            </p>
-          </article>
-          <article class="limit-card">
-            <h3>Live answering still needs an API key</h3>
-            <p>
-              The offline benchmark runs without a hosted model, but the live API answer path still
-              depends on an Anthropic-compatible key.
-            </p>
-          </article>
+        <div class="sample-card">
+          <div class="sample-meta">
+            <span>Fixture sample</span>
+            <code data-sample-display-id></code>
+          </div>
+          <h3 data-sample-question></h3>
+          <p class="sample-answer" data-sample-answer></p>
+          <div class="sample-badges" data-sample-badges></div>
+          <div class="sample-documents">
+            <p>Relevant document ids</p>
+            <ul data-sample-docs></ul>
+          </div>
         </div>
       </div>
     </section>
   </main>
 
   <footer class="footer">
-    <div class="shell footer-row">
+    <div class="container footer-row">
       <div>
-        <p class="footer-title">AARS</p>
-        <p class="footer-copy">Agentic Adaptive Retrieval System.</p>
+        <strong>AARS</strong>
+        <p>Agentic Adaptive Retrieval System.</p>
       </div>
       <div class="footer-links">
         <a href="https://github.com/lekhanpro/aars">GitHub</a>
         <a href="https://github.com/lekhanpro/aars/blob/main/README.md">README</a>
-        <a href="https://github.com/lekhanpro/aars/blob/main/LICENSE">MIT License</a>
+        <a href="https://github.com/lekhanpro/aars/tree/main/benchmarks">Benchmark</a>
       </div>
     </div>
   </footer>
