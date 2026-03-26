@@ -29,11 +29,19 @@ class RetrievalStrategy(StrEnum):
     NONE = "none"
 
 
+class ContentModality(StrEnum):
+    TEXT = "text"
+    IMAGE = "image"
+    VIDEO = "video"
+    UNKNOWN = "unknown"
+
+
 class Document(BaseModel):
     id: str
     content: str
     metadata: dict = Field(default_factory=dict)
     score: float = 0.0
+    modality: str = "text"
 
 
 class Citation(BaseModel):

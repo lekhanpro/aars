@@ -15,6 +15,9 @@ from src.ingestion.graph_builder import GraphBuilder
 from src.ingestion.chunkers.recursive import RecursiveChunker
 from src.ingestion.loaders.pdf_loader import PDFLoader
 from src.ingestion.loaders.text_loader import TextLoader
+from src.ingestion.loaders.image_loader import ImageLoader
+from src.ingestion.loaders.video_loader import VideoLoader
+from src.ingestion.multimodal import MultimodalSegregator, detect_modality, ContentModality
 from src.retrieval.graph import GraphRetriever
 from src.retrieval.keyword import KeywordRetriever
 from src.utils.embeddings import EmbeddingModel
@@ -22,10 +25,10 @@ from src.utils.embeddings import EmbeddingModel
 logger = structlog.get_logger(__name__)
 
 # Map lowercase file extensions to loader instances.
-_LOADER_REGISTRY: dict[str, PDFLoader | TextLoader] = {}
+_LOADER_REGISTRY: dict[str, PDFLoader | TextLoader | ImageLoader | VideoLoader] = {}
 
 
-def _get_loader(extension: str) -> PDFLoader | TextLoader:
+def _get_loader(extension: str) -> PDFLoader | TextLoader | ImageLoader | VideoLoader:
     """Return a cached loader instance for the given file extension."""
     ext = extension.lower()
     if ext not in _LOADER_REGISTRY:
@@ -33,10 +36,14 @@ def _get_loader(extension: str) -> PDFLoader | TextLoader:
             _LOADER_REGISTRY[ext] = PDFLoader()
         elif ext in TextLoader.SUPPORTED_EXTENSIONS:
             _LOADER_REGISTRY[ext] = TextLoader()
+        elif ext in ImageLoader.SUPPORTED_EXTENSIONS:
+            _LOADER_REGISTRY[ext] = ImageLoader()
+        elif ext in VideoLoader.SUPPORTED_EXTENSIONS:
+            _LOADER_REGISTRY[ext] = VideoLoader()
         else:
             raise ValueError(
                 f"Unsupported file type '{ext}'. Supported types: "
-                f"{sorted(PDFLoader.SUPPORTED_EXTENSIONS | TextLoader.SUPPORTED_EXTENSIONS)}"
+                f"{sorted(PDFLoader.SUPPORTED_EXTENSIONS | TextLoader.SUPPORTED_EXTENSIONS | ImageLoader.SUPPORTED_EXTENSIONS | VideoLoader.SUPPORTED_EXTENSIONS)}"
             )
     return _LOADER_REGISTRY[ext]
 

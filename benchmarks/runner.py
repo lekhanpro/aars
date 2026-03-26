@@ -647,6 +647,7 @@ class BenchmarkRunner:
             "flare",
             "self_rag",
             "standard_routing",
+            "treedex",
         ]
         for name in ordered:
             result = systems[name]

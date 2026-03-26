@@ -8,7 +8,7 @@
       "name": "aars",
       "exact_match": 1.0,
       "token_f1": 1.0,
-      "avg_latency_ms": 1.6666666667030465,
+      "avg_latency_ms": 3.444444444438785,
       "total_tokens": 5860,
       "total_api_calls": 9,
       "recall_at_3": 1.0,
@@ -42,7 +42,7 @@
       "name": "aars_no_reflection",
       "exact_match": 1.0,
       "token_f1": 1.0,
-      "avg_latency_ms": 1.7777777777357389,
+      "avg_latency_ms": 3.555555555572533,
       "total_tokens": 3726,
       "total_api_calls": 9,
       "recall_at_3": 1.0,
@@ -241,6 +241,40 @@
         1.0,
         1.0
       ]
+    },
+    "treedex": {
+      "name": "treedex",
+      "exact_match": 1.0,
+      "token_f1": 1.0,
+      "avg_latency_ms": 0.0,
+      "total_tokens": 795,
+      "total_api_calls": 9,
+      "recall_at_3": 1.0,
+      "precision_at_3": 0.4629629629629629,
+      "mrr_at_5": 0.925925925925926,
+      "ndcg_at_5": 0.9355245321275762,
+      "per_sample_em": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "per_sample_f1": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
     }
   },
   "significance_vs_naive_rag": {
@@ -285,7 +319,14 @@
       "mean_diff": 0.0,
       "ci_lower": 0.0,
       "ci_upper": 0.0
+    },
+    "treedex": {
+      "p_value": 1.0,
+      "significant": false,
+      "mean_diff": 0.0,
+      "ci_lower": 0.0,
+      "ci_upper": 0.0
     }
   },
-  "markdown_table": "| System | EM | F1 | Recall@3 | Precision@3 | MRR@5 | NDCG@5 | Avg Latency (ms) |\n|--------|----|----|----------|-------------|-------|--------|------------------|\n| aars | 1.000 | 1.000 | 1.000 | 0.537 | 0.944 | 0.959 | 1.67 |\n| aars_no_reflection | 1.000 | 1.000 | 1.000 | 0.537 | 0.944 | 0.959 | 1.78 |\n| naive_rag | 1.000 | 1.000 | 1.000 | 0.444 | 0.944 | 0.959 | 0.00 |\n| hybrid_rag | 1.000 | 1.000 | 1.000 | 0.444 | 1.000 | 0.991 | 0.00 |\n| flare | 1.000 | 1.000 | 1.000 | 0.444 | 0.944 | 0.959 | 0.00 |\n| self_rag | 1.000 | 1.000 | 1.000 | 0.444 | 0.944 | 0.959 | 0.00 |\n| standard_routing | 1.000 | 1.000 | 1.000 | 0.444 | 0.944 | 0.959 | 0.00 |"
+  "markdown_table": "| System | EM | F1 | Recall@3 | Precision@3 | MRR@5 | NDCG@5 | Avg Latency (ms) |\n|--------|----|----|----------|-------------|-------|--------|------------------|\n| aars | 1.000 | 1.000 | 1.000 | 0.537 | 0.944 | 0.959 | 3.44 |\n| aars_no_reflection | 1.000 | 1.000 | 1.000 | 0.537 | 0.944 | 0.959 | 3.56 |\n| naive_rag | 1.000 | 1.000 | 1.000 | 0.444 | 0.944 | 0.959 | 0.00 |\n| hybrid_rag | 1.000 | 1.000 | 1.000 | 0.444 | 1.000 | 0.991 | 0.00 |\n| flare | 1.000 | 1.000 | 1.000 | 0.444 | 0.944 | 0.959 | 0.00 |\n| self_rag | 1.000 | 1.000 | 1.000 | 0.444 | 0.944 | 0.959 | 0.00 |\n| standard_routing | 1.000 | 1.000 | 1.000 | 0.444 | 0.944 | 0.959 | 0.00 |\n| treedex | 1.000 | 1.000 | 1.000 | 0.463 | 0.926 | 0.936 | 0.00 |"
 }

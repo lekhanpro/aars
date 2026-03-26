@@ -1,5 +1,7 @@
 # AARS
 
+**Adaptive multi-strategy RAG that plans before it retrieves.**
+
 Adaptive multi-strategy RAG backend with planner, reflection, fusion, and a reproducible offline benchmark.
 
 AARS treats retrieval as a query-time decision instead of a fixed pipeline. It can plan before retrieving, switch between keyword, vector, graph, or hybrid retrieval, reflect on whether the evidence is sufficient, then fuse and rerank before answer generation.
@@ -9,6 +11,7 @@ AARS treats retrieval as a query-time decision instead of a fixed pipeline. It c
 [![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-14222b?style=flat-square)](https://lekhanpro.github.io/aars/)
 [![Benchmark](https://img.shields.io/badge/benchmark-local_fixture-115e59?style=flat-square)](https://github.com/lekhanpro/aars/tree/main/benchmarks)
 [![License: MIT](https://img.shields.io/badge/License-MIT-22c55e?style=flat-square)](LICENSE)
+[![CI](https://github.com/lekhanpro/aars/actions/workflows/ci.yml/badge.svg)](https://github.com/lekhanpro/aars/actions/workflows/ci.yml)
 
 Documentation site: [lekhanpro.github.io/aars](https://lekhanpro.github.io/aars/)
 
@@ -169,11 +172,14 @@ python -m compileall src benchmarks tests examples ui config scripts
 pytest -q
 ```
 
+## Multimodal Support
+
+AARS supports ingestion of images and video files alongside text documents. During ingestion, multimodal files are automatically segregated: images (`.png`, `.jpg`, `.jpeg`, `.gif`, `.bmp`, `.webp`, `.tiff`) and videos (`.mp4`, `.avi`, `.mov`, `.mkv`, `.webm`) are detected by extension, stored with appropriate metadata, and indexed into the target collection. This allows retrieval queries to surface multimodal evidence when relevant, while keeping text-based chunking and embedding pipelines separate from binary media handling.
+
 ## Current Limitations
 
 - Live answer generation still depends on an Anthropic-compatible key.
 - The reproducible benchmark is local-fixture only, not HotpotQA or another external public dataset.
-- `paper/main.pdf` may still exist locally if Windows has it locked open, but it is ignored and no longer part of the tracked project surface.
 
 ## License
 

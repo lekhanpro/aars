@@ -6,7 +6,7 @@
   <title>AARS | Adaptive Retrieval That Plans First</title>
   <meta
     name="description"
-    content="AARS is an adaptive RAG backend with planner, reflection, keyword-vector-graph retrieval, and a reproducible offline benchmark."
+    content="AARS is an adaptive RAG backend with planner, reflection, keyword-vector-graph retrieval, multimodal support, and a reproducible offline benchmark."
   >
   <link
     rel="icon"
@@ -29,27 +29,32 @@
     <nav class="nav" data-nav>
       <a href="#how">How It Works</a>
       <a href="#compare">Why AARS</a>
+      <a href="#multimodal">Multimodal</a>
       <a href="#benchmark">Benchmark</a>
+      <a href="#api">API</a>
       <a href="#quickstart">Quick Start</a>
       <a href="#samples">Samples</a>
+      <a href="#paper">Paper</a>
     </nav>
   </header>
 
   <main>
+    <!-- ===== HERO ===== -->
     <section class="hero" id="top">
       <div class="container hero-grid">
         <div class="hero-copy">
           <div class="badge-row">
             <span class="badge">Python 3.11+</span>
             <span class="badge">FastAPI</span>
+            <span class="badge">Multimodal</span>
             <span class="badge">Local benchmark</span>
             <span class="badge">MIT</span>
           </div>
           <h1>Adaptive retrieval that plans before it retrieves.</h1>
           <p class="hero-text">
-            AARS is a query-aware RAG backend that selects retrieval strategy per question, checks
-            whether the evidence is sufficient, and fuses keyword, vector, and graph results before
-            answer generation.
+            AARS is a query-aware RAG backend that selects retrieval strategy per question&mdash;keyword,
+            vector, graph, or hybrid&mdash;checks whether the evidence is sufficient via reflection, fuses
+            results with RRF + MMR, and supports text, image, and video ingestion.
           </p>
           <p class="hero-subtext">
             No fake hosted demo. No fake benchmark claims. The runtime path and the benchmark in
@@ -69,8 +74,12 @@
               <span>F1 on local fixture</span>
             </article>
             <article>
-              <strong>4 modes</strong>
-              <span>keyword, vector, graph, hybrid</span>
+              <strong>5 modes</strong>
+              <span>keyword, vector, graph, hybrid, none</span>
+            </article>
+            <article>
+              <strong>3 modalities</strong>
+              <span>text, image, video</span>
             </article>
           </div>
         </div>
@@ -81,6 +90,7 @@
       </div>
     </section>
 
+    <!-- ===== HOW IT WORKS ===== -->
     <section class="section" id="how">
       <div class="container section-grid">
         <div class="section-copy">
@@ -89,27 +99,27 @@
           <ol class="step-list">
             <li>
               <strong>Plan</strong>
-              <span>Classify the query and choose keyword, vector, graph, hybrid, or none.</span>
+              <span>Classify the query by type (factual, analytical, multi-hop, opinion, conversational) and complexity (simple, moderate, complex). Choose keyword, vector, graph, hybrid, or none.</span>
             </li>
             <li>
               <strong>Retrieve</strong>
-              <span>Run collection-aware retrieval across the configured stores.</span>
+              <span>Run collection-aware retrieval across BM25, ChromaDB dense vectors, or entity-relationship graph traversal.</span>
             </li>
             <li>
               <strong>Reflect</strong>
-              <span>Check evidence sufficiency before answering from weak context.</span>
+              <span>An LLM-based reflection agent checks evidence sufficiency, outputting confidence score and gap analysis.</span>
             </li>
             <li>
               <strong>Retry</strong>
-              <span>Revise query and strategy when the first pass is not enough.</span>
+              <span>When evidence is insufficient, revise the query and strategy. Up to 3 reflection iterations.</span>
             </li>
             <li>
               <strong>Fuse</strong>
-              <span>Merge ranked lists with reciprocal-rank fusion and optionally rerank with MMR.</span>
+              <span>Merge ranked lists with Reciprocal Rank Fusion (RRF, k=60) and rerank with Maximal Marginal Relevance (MMR, &lambda;=0.5).</span>
             </li>
             <li>
               <strong>Generate</strong>
-              <span>Return answer, citations, documents, confidence, and trace data.</span>
+              <span>Return grounded answer with citations, documents, confidence, reasoning, and full execution trace.</span>
             </li>
           </ol>
         </div>
@@ -120,6 +130,7 @@
       </div>
     </section>
 
+    <!-- ===== WHY AARS ===== -->
     <section class="section section-contrast" id="compare">
       <div class="container compare-grid">
         <div class="panel panel-light">
@@ -132,8 +143,15 @@
             <article>
               <h3>Query-aware strategy selection</h3>
               <p>
-                Factual questions, semantic questions, and multi-hop questions do not get forced
-                through the same retriever path.
+                Factual, semantic, and multi-hop questions are routed to keyword, vector, or graph
+                retrieval respectively. No one-size-fits-all pipeline.
+              </p>
+            </article>
+            <article>
+              <h3>Reflection-driven re-retrieval</h3>
+              <p>
+                Unlike Self-RAG (binary retrieve/don't) or FLARE (confidence-triggered), AARS's
+                reflection agent can switch strategies and rewrite queries across iterations.
               </p>
             </article>
             <article>
@@ -144,17 +162,10 @@
               </p>
             </article>
             <article>
-              <h3>Real fallback behavior</h3>
+              <h3>Graceful fallbacks</h3>
               <p>
-                Sentence-transformers and spaCy are optional. AARS still runs with deterministic
-                hashing embeddings and lightweight entity extraction.
-              </p>
-            </article>
-            <article>
-              <h3>Grounded outputs</h3>
-              <p>
-                Query responses can include citations, documents, plan, reflection results, and a
-                bounded execution trace.
+                sentence-transformers unavailable? Falls back to hashing embeddings. spaCy missing?
+                Uses title-case entity extraction. AARS still runs.
               </p>
             </article>
           </div>
@@ -162,20 +173,119 @@
       </div>
     </section>
 
+    <!-- ===== MULTIMODAL ===== -->
+    <section class="section" id="multimodal">
+      <div class="container section-grid">
+        <div class="section-copy">
+          <p class="eyebrow">Multimodal Support</p>
+          <h2>Text, images, and video through a single ingestion pipeline.</h2>
+          <div class="feature-stack">
+            <article>
+              <h3>Automatic modality detection</h3>
+              <p>
+                Files are classified as text, image, or video by extension and MIME type.
+                Per-collection modality statistics inform retrieval strategy selection.
+              </p>
+            </article>
+            <article>
+              <h3>Image processing</h3>
+              <p>
+                OCR extraction via pytesseract when available. Fallback to metadata-only documents
+                with dimensions and format. Supports PNG, JPG, GIF, BMP, WebP, TIFF.
+              </p>
+            </article>
+            <article>
+              <h3>Video processing</h3>
+              <p>
+                Keyframe extraction via OpenCV at regular intervals. Audio transcription via
+                ffmpeg + speech_recognition. Supports MP4, AVI, MOV, MKV, WebM.
+              </p>
+            </article>
+            <article>
+              <h3>Unified indexing</h3>
+              <p>
+                After modality-specific extraction, all content is unified into text that flows
+                through the standard chunking, embedding, and indexing pipeline.
+              </p>
+            </article>
+          </div>
+        </div>
+
+        <div class="panel">
+          <table class="metric-table" style="border-radius: var(--radius-lg); overflow: hidden;">
+            <thead>
+              <tr>
+                <th>Modality</th>
+                <th>Formats</th>
+                <th>Extraction</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Text</strong></td>
+                <td>.txt, .md, .rst, .csv, .log, .pdf</td>
+                <td>Direct parsing, PyMuPDF for PDF</td>
+              </tr>
+              <tr>
+                <td><strong>Image</strong></td>
+                <td>.png, .jpg, .jpeg, .gif, .bmp, .webp, .tiff</td>
+                <td>OCR (pytesseract) or metadata</td>
+              </tr>
+              <tr>
+                <td><strong>Video</strong></td>
+                <td>.mp4, .avi, .mov, .mkv, .webm, .flv</td>
+                <td>Keyframes (OpenCV) + audio transcript</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== RETRIEVAL STRATEGIES ===== -->
+    <section class="section section-contrast" id="strategies">
+      <div class="container">
+        <div class="section-copy section-copy-light narrow">
+          <p class="eyebrow">Retrieval Strategies</p>
+          <h2>Four retrieval modes, selected per query.</h2>
+        </div>
+        <div class="feature-stack" style="margin-top:2rem; display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:1rem;">
+          <article>
+            <h3>Keyword (BM25)</h3>
+            <p>Okapi BM25 sparse lexical scoring. Thread-safe in-memory index with per-collection isolation. Best for factual queries with strong lexical cues.</p>
+          </article>
+          <article>
+            <h3>Vector (Dense)</h3>
+            <p>sentence-transformers embeddings (all-MiniLM-L6-v2) stored in ChromaDB. Cosine similarity matching. Deterministic hashing fallback when ST unavailable.</p>
+          </article>
+          <article>
+            <h3>Graph (Entity)</h3>
+            <p>spaCy NER builds entity co-occurrence graphs (NetworkX). BFS traversal up to configurable hop limit. Ideal for multi-hop questions connecting entities across documents.</p>
+          </article>
+          <article>
+            <h3>Hybrid (Fusion)</h3>
+            <p>Executes all enabled strategies in parallel, merges via RRF, diversifies with MMR. Selected when the planner detects mixed or complex queries.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== BENCHMARK ===== -->
     <section class="section" id="benchmark">
       <div class="container benchmark-grid">
         <div class="section-copy">
           <p class="eyebrow">Benchmark</p>
           <h2>A reproducible local benchmark, not a hand-waved leaderboard claim.</h2>
           <p>
-            The checked-in benchmark is the local offline fixture only: 12 documents, 9 questions,
-            7 systems, and no external dataset download. It exists for regression checking and for
-            proving the retrieval runtime actually works.
+            The checked-in benchmark is the local offline fixture: 12 documents, 9 questions,
+            8 systems (including TreeDex), and no external dataset download. It exists for
+            regression checking and for proving the retrieval runtime actually works.
           </p>
           <div class="callout-list">
             <div>Result file: <code>benchmarks/results_local.json</code></div>
             <div>Stable metrics: EM, F1, Recall@3, Precision@3, MRR@5, NDCG@5</div>
             <div>Latency is local-machine dependent and can move between runs</div>
+            <div>Run: <code>python benchmarks/runner.py --output benchmarks/results_local.json</code></div>
           </div>
         </div>
 
@@ -234,12 +344,178 @@
               <td>1.000</td>
               <td>0.991</td>
             </tr>
+            <tr>
+              <td>FLARE-style</td>
+              <td>1.000</td>
+              <td>1.000</td>
+              <td>1.000</td>
+              <td>0.444</td>
+              <td>0.944</td>
+              <td>0.959</td>
+            </tr>
+            <tr>
+              <td>Self-RAG-style</td>
+              <td>1.000</td>
+              <td>1.000</td>
+              <td>1.000</td>
+              <td>0.444</td>
+              <td>0.944</td>
+              <td>0.959</td>
+            </tr>
+            <tr>
+              <td>StandardRouting</td>
+              <td>1.000</td>
+              <td>1.000</td>
+              <td>1.000</td>
+              <td>0.444</td>
+              <td>0.944</td>
+              <td>0.959</td>
+            </tr>
+            <tr>
+              <td>TreeDex-style</td>
+              <td>1.000</td>
+              <td>1.000</td>
+              <td>1.000</td>
+              <td>0.463</td>
+              <td>0.926</td>
+              <td>0.936</td>
+            </tr>
           </tbody>
         </table>
       </div>
     </section>
 
-    <section class="section section-soft" id="quickstart">
+    <!-- ===== API REFERENCE ===== -->
+    <section class="section section-soft" id="api">
+      <div class="container">
+        <div class="section-copy narrow">
+          <p class="eyebrow">API Reference</p>
+          <h2>Six endpoints. One coherent surface.</h2>
+        </div>
+
+        <div class="table-shell" style="margin-top:2rem;">
+          <table class="metric-table">
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Endpoint</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>POST</strong></td>
+                <td><code>/api/v1/query</code></td>
+                <td>Run planning, retrieval, reflection, fusion, and answer generation</td>
+              </tr>
+              <tr>
+                <td><strong>POST</strong></td>
+                <td><code>/api/v1/ingest</code></td>
+                <td>Upload text, PDF, image, or video into a collection</td>
+              </tr>
+              <tr>
+                <td><strong>GET</strong></td>
+                <td><code>/api/v1/health</code></td>
+                <td>API and ChromaDB connectivity check</td>
+              </tr>
+              <tr>
+                <td><strong>GET</strong></td>
+                <td><code>/api/v1/collections</code></td>
+                <td>List available document collections</td>
+              </tr>
+              <tr>
+                <td><strong>DELETE</strong></td>
+                <td><code>/api/v1/collections/{name}</code></td>
+                <td>Delete a collection and its documents</td>
+              </tr>
+              <tr>
+                <td><strong>GET</strong></td>
+                <td><code>/api/v1/debug/trace/{id}</code></td>
+                <td>Fetch a stored pipeline execution trace</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="margin-top:2rem;">
+          <div class="section-copy">
+            <h3>Query Request Parameters</h3>
+          </div>
+          <div class="table-shell" style="margin-top:1rem;">
+            <table class="metric-table">
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>Type</th>
+                  <th>Default</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>query</code></td><td>string</td><td>required</td><td>User query (1-2000 chars)</td></tr>
+                <tr><td><code>collection</code></td><td>string</td><td>"default"</td><td>Document collection to search</td></tr>
+                <tr><td><code>top_k</code></td><td>int</td><td>5</td><td>Number of results (1-50)</td></tr>
+                <tr><td><code>enable_planner</code></td><td>bool</td><td>true</td><td>Enable LLM-based strategy selection</td></tr>
+                <tr><td><code>enable_reflection</code></td><td>bool</td><td>true</td><td>Enable sufficiency evaluation loop</td></tr>
+                <tr><td><code>enable_fusion</code></td><td>bool</td><td>true</td><td>Enable RRF rank fusion</td></tr>
+                <tr><td><code>enable_mmr</code></td><td>bool</td><td>true</td><td>Enable diversity reranking</td></tr>
+                <tr><td><code>enable_keyword</code></td><td>bool</td><td>true</td><td>Allow BM25 retrieval</td></tr>
+                <tr><td><code>enable_graph</code></td><td>bool</td><td>true</td><td>Allow graph traversal retrieval</td></tr>
+                <tr><td><code>default_strategy</code></td><td>string</td><td>"vector"</td><td>Fallback when planner is disabled</td></tr>
+                <tr><td><code>enable_trace</code></td><td>bool</td><td>true</td><td>Include execution trace in response</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TECH STACK ===== -->
+    <section class="section section-contrast" id="stack">
+      <div class="container">
+        <div class="section-copy section-copy-light narrow">
+          <p class="eyebrow">Tech Stack</p>
+          <h2>Production-grade Python, async end to end.</h2>
+        </div>
+        <div class="feature-stack" style="margin-top:2rem; display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:1rem;">
+          <article>
+            <h3>FastAPI</h3>
+            <p>Async web framework with auto-generated OpenAPI docs, CORS support, and lifespan management.</p>
+          </article>
+          <article>
+            <h3>Anthropic Claude</h3>
+            <p>LLM client via official SDK for planner, reflection, and answer generation with structured output.</p>
+          </article>
+          <article>
+            <h3>ChromaDB</h3>
+            <p>Vector database for dense embedding storage and cosine similarity search.</p>
+          </article>
+          <article>
+            <h3>sentence-transformers</h3>
+            <p>all-MiniLM-L6-v2 embeddings with deterministic SHA-256 hashing fallback.</p>
+          </article>
+          <article>
+            <h3>NetworkX + spaCy</h3>
+            <p>Entity co-occurrence graphs with NER extraction and BFS traversal for multi-hop queries.</p>
+          </article>
+          <article>
+            <h3>Pydantic + structlog</h3>
+            <p>Type-safe configuration with env var overrides and structured production logging.</p>
+          </article>
+          <article>
+            <h3>Streamlit UI</h3>
+            <p>Interactive dashboard for querying, document upload, and trace inspection.</p>
+          </article>
+          <article>
+            <h3>pytest</h3>
+            <p>63 tests covering agents, chunkers, fusion, metrics, retrievers, traces, and API endpoints.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== QUICK START ===== -->
+    <section class="section" id="quickstart">
       <div class="container">
         <div class="section-copy narrow">
           <p class="eyebrow">Quick Start</p>
@@ -270,7 +546,10 @@ pip install -e ".[dev,ui]"</pre>
               <h3>Start API</h3>
               <button class="copy-button" type="button" data-copy-target="api-code">Copy</button>
             </div>
-            <pre id="api-code">docker run -p 8001:8000 chromadb/chroma:latest
+            <pre id="api-code">cp .env.example .env
+# set ANTHROPIC_API_KEY in .env
+
+docker run -p 8001:8000 chromadb/chroma:latest
 uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload</pre>
           </article>
 
@@ -295,9 +574,71 @@ uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload</pre>
   }'</pre>
           </article>
         </div>
+
+        <div class="code-grid" style="margin-top:1rem;">
+          <article class="code-card">
+            <div class="code-head">
+              <h3>Ingest a document</h3>
+              <button class="copy-button" type="button" data-copy-target="ingest-code">Copy</button>
+            </div>
+            <pre id="ingest-code">curl -X POST http://localhost:8000/api/v1/ingest \
+  -F "file=@my_document.pdf" \
+  -F "collection=demo"</pre>
+          </article>
+
+          <article class="code-card">
+            <div class="code-head">
+              <h3>Run tests</h3>
+              <button class="copy-button" type="button" data-copy-target="test-code">Copy</button>
+            </div>
+            <pre id="test-code">pytest -q
+python -m compileall src benchmarks tests</pre>
+          </article>
+        </div>
       </div>
     </section>
 
+    <!-- ===== PROJECT STRUCTURE ===== -->
+    <section class="section section-soft" id="structure">
+      <div class="container section-grid">
+        <div class="section-copy">
+          <p class="eyebrow">Project Structure</p>
+          <h2>Clean separation of concerns, 46 source files.</h2>
+        </div>
+        <div class="code-card" style="max-width:600px;">
+          <div class="code-head">
+            <h3>Layout</h3>
+          </div>
+          <pre>aars/
+├── src/
+│   ├── main.py              # FastAPI app with lifespan
+│   ├── agents/              # Planner + Reflection agents
+│   ├── api/                 # Endpoints + schemas
+│   ├── fusion/              # RRF + MMR + pipeline
+│   ├── generation/          # Answer generator
+│   ├── ingestion/           # Pipeline, chunkers, loaders
+│   │   ├── loaders/
+│   │   │   ├── pdf_loader.py
+│   │   │   ├── text_loader.py
+│   │   │   ├── image_loader.py
+│   │   │   └── video_loader.py
+│   │   └── multimodal.py    # Modality detection
+│   ├── llm/                 # Anthropic client
+│   ├── pipeline/            # Orchestrator + trace
+│   ├── retrieval/           # keyword, vector, graph, none
+│   └── utils/               # Embeddings singleton
+├── benchmarks/              # Runner, baselines, metrics
+├── config/                  # Settings + prompts
+├── tests/                   # 63 tests
+├── ui/                      # Streamlit dashboard
+├── docs/                    # This site
+├── paper/                   # Springer LNCS research paper
+└── assets/                  # SVG diagrams</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SAMPLE QUERIES ===== -->
     <section class="section" id="samples">
       <div class="container sample-layout">
         <div class="section-copy">
@@ -325,6 +666,50 @@ uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload</pre>
         </div>
       </div>
     </section>
+
+    <!-- ===== RESEARCH PAPER ===== -->
+    <section class="section section-contrast" id="paper">
+      <div class="container section-grid">
+        <div class="section-copy section-copy-light">
+          <p class="eyebrow">Research Paper</p>
+          <h2>Springer LNCS format, 20 real references.</h2>
+          <p>
+            The paper covers AARS architecture, adaptive strategy selection, reflection mechanism,
+            multimodal support, and benchmark results against 8 baseline systems including
+            Adaptive-RAG, Self-RAG, FLARE, CRAG, GraphRAG, and TreeDex.
+          </p>
+          <div class="feature-stack">
+            <article>
+              <h3>Key contributions</h3>
+              <p>Query-aware strategy selection, reflection-driven iterative retrieval, multi-strategy RRF+MMR fusion, and multimodal content segregation.</p>
+            </article>
+            <article>
+              <h3>Compile the paper</h3>
+              <p><code>cd paper && pdflatex main.tex && pdflatex main.tex</code></p>
+            </article>
+          </div>
+          <div class="cta-row" style="margin-top:1.5rem;">
+            <a class="button button-secondary" href="https://github.com/lekhanpro/aars/tree/main/paper">View Paper Source</a>
+          </div>
+        </div>
+        <div class="panel panel-light" style="padding:2rem;">
+          <h3 style="margin:0 0 0.75rem; font-size:0.95rem; color:var(--teal);">References include:</h3>
+          <ol style="margin:0; padding-left:1.2rem; color:var(--ink-soft); font-size:0.88rem; line-height:1.7;">
+            <li>Lewis et al. (2020) &mdash; RAG for Knowledge-Intensive NLP</li>
+            <li>Robertson &amp; Zaragoza (2009) &mdash; BM25 and Beyond</li>
+            <li>Cormack et al. (2009) &mdash; Reciprocal Rank Fusion</li>
+            <li>Carbonell &amp; Goldstein (1998) &mdash; MMR Diversity Reranking</li>
+            <li>Asai et al. (2023) &mdash; Self-RAG</li>
+            <li>Jiang et al. (2023) &mdash; FLARE Active Retrieval</li>
+            <li>Jeong et al. (2024) &mdash; Adaptive-RAG</li>
+            <li>Peng et al. (2024) &mdash; GraphRAG Survey</li>
+            <li>Yan et al. (2024) &mdash; Corrective RAG</li>
+            <li>Mei et al. (2025) &mdash; Multimodal RAG Survey</li>
+          </ol>
+          <p style="margin:0.75rem 0 0; font-size:0.82rem; color:var(--ink-soft);">...and 10 more. Full bibliography in <code>paper/main.tex</code>.</p>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer class="footer">
@@ -336,7 +721,9 @@ uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload</pre>
       <div class="footer-links">
         <a href="https://github.com/lekhanpro/aars">GitHub</a>
         <a href="https://github.com/lekhanpro/aars/blob/main/README.md">README</a>
+        <a href="https://github.com/lekhanpro/aars/blob/main/DOCS.md">API Docs</a>
         <a href="https://github.com/lekhanpro/aars/tree/main/benchmarks">Benchmark</a>
+        <a href="https://github.com/lekhanpro/aars/tree/main/paper">Paper</a>
       </div>
     </div>
   </footer>

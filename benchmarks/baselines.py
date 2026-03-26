@@ -482,6 +482,80 @@ class StandardRouting(BaseBaseline):
 
 
 # ------------------------------------------------------------------
+# 6. TreeDex baseline
+# ------------------------------------------------------------------
+
+class TreeDexBaseline(BaseBaseline):
+    """Tree-based vectorless retrieval inspired by TreeDex.
+
+    Builds a hierarchical document index using heading detection and
+    retrieves by matching query terms against the tree structure,
+    prioritizing deeper (more specific) matches.
+    """
+
+    name = "treedex"
+
+    def __init__(self, top_k: int = 5) -> None:
+        self._top_k = top_k
+
+    async def run(
+        self,
+        query: str,
+        documents: list[dict[str, Any]],
+        llm_client: Any,
+    ) -> dict[str, Any]:
+        """Build tree index, traverse for matches, generate answer."""
+        query_tokens = _tokenise(query)
+
+        # Build a simple hierarchical index: detect "sections" by splitting
+        # on sentence boundaries and scoring by structural depth.
+        scored_segments: list[tuple[dict[str, Any], float]] = []
+
+        for doc in documents:
+            content = doc.get("content", "")
+            sentences = [s.strip() for s in content.split(". ") if s.strip()]
+
+            # Score each document by hierarchical term matching:
+            # - Terms in first sentence (title/heading) get 2x weight
+            # - Terms in body get 1x weight
+            # - Longer documents with matching terms get a depth bonus
+            heading_tokens = set(_tokenise(sentences[0])) if sentences else set()
+            body_tokens = set(_tokenise(content))
+
+            heading_overlap = len(set(query_tokens) & heading_tokens)
+            body_overlap = len(set(query_tokens) & body_tokens)
+
+            # Hierarchical scoring: heading matches are worth more
+            tree_score = (heading_overlap * 2.0 + body_overlap * 1.0)
+
+            # Depth bonus: longer, more specific documents rank higher
+            # when they have matches (simulates tree depth traversal)
+            if tree_score > 0:
+                depth_factor = min(len(sentences) / 5.0, 2.0)
+                tree_score *= (1.0 + 0.1 * depth_factor)
+
+            if tree_score > 0:
+                scored_segments.append((doc, tree_score))
+
+        # Sort by tree score descending
+        scored_segments.sort(key=lambda x: x[1], reverse=True)
+        selected = [doc for doc, _ in scored_segments[:self._top_k]]
+
+        # If no matches, fall back to first documents
+        if not selected:
+            selected = documents[:self._top_k]
+
+        context = _format_context(selected)
+        answer = await _generate_answer(llm_client, query, context)
+
+        return BaselineResult(
+            answer=answer,
+            documents=selected,
+            strategy_used="tree_index",
+        ).to_dict()
+
+
+# ------------------------------------------------------------------
 # Registry
 # ------------------------------------------------------------------
 
@@ -491,6 +565,7 @@ ALL_BASELINES: list[BaseBaseline] = [
     FLAREBaseline(),
     SelfRAGBaseline(),
     StandardRouting(),
+    TreeDexBaseline(),
 ]
 
 
