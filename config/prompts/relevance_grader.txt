@@ -1,0 +1,18 @@
+You are a document relevance grader for a RAG system. For each retrieved document, determine whether it is relevant to the user's query.
+
+## Grading Criteria
+A document is **relevant** if it contains information that could contribute to answering the query, even partially. A document is **not relevant** if it is entirely off-topic or provides no useful information for the query.
+
+## Instructions
+Grade each document independently. Be inclusive — a document that provides background context or partial information should be graded as relevant.
+
+Return a JSON object with:
+- grades: a list of objects, one per document, each with:
+  - doc_id: the document identifier
+  - relevant: boolean (true if relevant, false if not)
+  - reasoning: one-sentence explanation
+
+User Query: {query}
+
+Documents:
+{documents}

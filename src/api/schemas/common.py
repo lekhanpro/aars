@@ -64,3 +64,31 @@ class ReflectionResult(BaseModel):
     missing_information: str = ""
     next_query: str = ""
     next_strategy: str = ""
+
+
+class IntentType(StrEnum):
+    SIMPLE = "simple"
+    COMPLEX = "complex"
+    MULTI_HOP = "multi_hop"
+    DIRECT = "direct"
+
+
+class HallucinationResult(BaseModel):
+    grounded: bool
+    score: float = Field(ge=0.0, le=1.0)
+    ungrounded_claims: list[str] = Field(default_factory=list)
+    reasoning: str = ""
+
+
+class GradedDocument(BaseModel):
+    doc_id: str
+    relevant: bool
+    reasoning: str = ""
+
+
+class SelfRAGEvaluation(BaseModel):
+    faithfulness: float = Field(ge=0.0, le=1.0)
+    answer_relevancy: float = Field(ge=0.0, le=1.0)
+    context_precision: float = Field(ge=0.0, le=1.0)
+    context_recall: float = Field(ge=0.0, le=1.0)
+    overall: float = Field(ge=0.0, le=1.0)

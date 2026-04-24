@@ -7,11 +7,18 @@ from typing import TYPE_CHECKING
 
 import structlog
 
+from src.agents.hallucination_checker import HallucinationChecker
+from src.agents.intent_router import IntentRouter
 from src.agents.planner import PlannerAgent
+from src.agents.query_rewriter import QueryRewriter
+from src.agents.reranker import CrossEncoderReranker
 from src.agents.reflection import ReflectionAgent
+from src.agents.relevance_grader import RelevanceGrader
+from src.agents.self_rag_evaluator import SelfRAGEvaluator
 from src.api.schemas import (
     Complexity,
     Document,
+    GradedDocument,
     QueryRequest,
     QueryResponse,
     QueryType,
@@ -19,6 +26,7 @@ from src.api.schemas import (
     ReflectionResult,
     RetrievalStrategy,
 )
+from src.api.schemas.common import IntentType
 from src.fusion.fusion_pipeline import FusionPipeline
 from src.fusion.mmr import MaximalMarginalRelevance
 from src.fusion.rrf import ReciprocalRankFusion
@@ -60,11 +68,19 @@ class PipelineOrchestrator:
         )
 
         # Initialize agents
+        self.intent_router = IntentRouter(llm_client)
         self.planner = PlannerAgent(llm_client)
         self.reflection = ReflectionAgent(
             llm_client, max_iterations=settings.pipeline.max_reflection_iterations
         )
+        self.relevance_grader = RelevanceGrader(llm_client)
+        self.query_rewriter = QueryRewriter(llm_client)
+        self.reranker = CrossEncoderReranker(model_name=settings.reranker.model)
         self.generator = AnswerGenerator(llm_client)
+        self.hallucination_checker = HallucinationChecker(
+            llm_client, mode=settings.hallucination.mode
+        )
+        self.self_rag_evaluator = SelfRAGEvaluator(llm_client)
 
         # Initialize fusion
         rrf = ReciprocalRankFusion(k=settings.fusion.rrf_k)
@@ -104,11 +120,22 @@ class PipelineOrchestrator:
         trace = TraceRecorder()
         self.llm_client.reset_counters()
         reflection_results: list[ReflectionResult] = []
+        graded_documents: list[GradedDocument] = []
 
         try:
-            # Step 1: Planning
+            # Step 1: Intent classification
             t0 = time.monotonic()
-            plan = await self._build_plan(request)
+            intent = await self.intent_router.classify(request.query)
+            trace.record(
+                "intent_classification",
+                (time.monotonic() - t0) * 1000,
+                intent=intent.value,
+            )
+            logger.info("intent_classified", intent=intent.value)
+
+            # Step 2: Planning
+            t0 = time.monotonic()
+            plan = await self._build_plan(request, intent)
             trace.record(
                 "planning",
                 (time.monotonic() - t0) * 1000,
@@ -122,7 +149,7 @@ class PipelineOrchestrator:
                 query_type=plan.query_type.value,
             )
 
-            # Step 2: Retrieval (with reflection loop)
+            # Step 3: Retrieval (with reflection/grading loop)
             all_documents: list[Document] = []
             all_result_lists: list[list[Document]] = []
             current_query = plan.rewritten_query or request.query
@@ -148,7 +175,25 @@ class PipelineOrchestrator:
                     num_docs=len(iter_docs),
                 )
 
-                # Step 3: Reflection (skip on last iteration or if disabled)
+                # Step 3a: Per-document relevance grading
+                if request.enable_grading and iter_docs:
+                    t0 = time.monotonic()
+                    grades = await self.relevance_grader.grade(request.query, iter_docs)
+                    graded_documents.extend(grades)
+                    relevant_ids = {g.doc_id for g in grades if g.relevant}
+                    filtered_docs = [d for d in iter_docs if d.id in relevant_ids]
+                    trace.record(
+                        f"grading_iter_{iteration}",
+                        (time.monotonic() - t0) * 1000,
+                        relevant=len(filtered_docs),
+                        total=len(iter_docs),
+                    )
+                    if filtered_docs:
+                        all_documents = filtered_docs + [
+                            d for d in all_documents if d not in iter_docs
+                        ]
+
+                # Step 3b: Reflection (skip on last iteration or if disabled)
                 max_iters = self.settings.pipeline.max_reflection_iterations
                 if not request.enable_reflection or iteration >= max_iters:
                     break
@@ -169,8 +214,20 @@ class PipelineOrchestrator:
                 if reflection.sufficient:
                     break
 
-                # Update for next iteration
-                current_query = reflection.next_query or current_query
+                # Step 3c: Query rewriting for next iteration
+                t0 = time.monotonic()
+                rewrite_result = await self.query_rewriter.rewrite(
+                    query=current_query,
+                    context=reflection.missing_information or "Low relevance scores",
+                )
+                current_query = rewrite_result.rewritten
+                trace.record(
+                    f"query_rewrite_iter_{iteration}",
+                    (time.monotonic() - t0) * 1000,
+                    technique=rewrite_result.technique,
+                    rewritten=current_query[:120],
+                )
+
                 current_strategy = self._resolve_strategy(
                     reflection.next_strategy or current_strategy,
                     request,
@@ -210,13 +267,60 @@ class PipelineOrchestrator:
                 num_docs_out=len(fused_docs),
             )
 
-            # Step 5: Answer generation
+            # Step 5: Cross-encoder reranking
+            reranker_applied = False
+            if request.enable_reranker and fused_docs:
+                t0 = time.monotonic()
+                fused_docs = await self.reranker.rerank(
+                    query=request.query,
+                    documents=fused_docs,
+                    top_k=request.top_k,
+                )
+                reranker_applied = True
+                trace.record(
+                    "reranking",
+                    (time.monotonic() - t0) * 1000,
+                    num_docs=len(fused_docs),
+                )
+
+            # Step 6: Answer generation
             t0 = time.monotonic()
             answer_result = await self.generator.generate(request.query, fused_docs)
             trace.record(
                 "generation",
                 (time.monotonic() - t0) * 1000,
                 confidence=answer_result.confidence,
+            )
+
+            # Step 7: Hallucination check
+            hallucination_result = None
+            if request.enable_hallucination_check and fused_docs:
+                t0 = time.monotonic()
+                hallucination_result = await self.hallucination_checker.check(
+                    question=request.query,
+                    answer=answer_result.answer,
+                    documents=fused_docs,
+                )
+                trace.record(
+                    "hallucination_check",
+                    (time.monotonic() - t0) * 1000,
+                    grounded=hallucination_result.grounded,
+                    score=hallucination_result.score,
+                )
+
+            # Step 8: Self-RAG evaluation
+            t0 = time.monotonic()
+            self_rag_eval = await self.self_rag_evaluator.evaluate(
+                question=request.query,
+                answer=answer_result.answer,
+                documents=fused_docs,
+            )
+            trace.record(
+                "self_rag_evaluation",
+                (time.monotonic() - t0) * 1000,
+                faithfulness=self_rag_eval.faithfulness,
+                answer_relevancy=self_rag_eval.answer_relevancy,
+                overall=self_rag_eval.overall,
             )
 
             # Finalize trace
@@ -231,6 +335,10 @@ class PipelineOrchestrator:
                 retrieval_plan=plan,
                 reflection_results=reflection_results,
                 documents=fused_docs,
+                graded_documents=graded_documents,
+                hallucination_result=hallucination_result,
+                self_rag_evaluation=self_rag_eval,
+                reranker_applied=reranker_applied,
                 trace=pipeline_trace if request.enable_trace else None,
             )
 
@@ -287,8 +395,19 @@ class PipelineOrchestrator:
 
         return result_lists
 
-    async def _build_plan(self, request: QueryRequest) -> RetrievalPlan:
+    async def _build_plan(
+        self, request: QueryRequest, intent: IntentType | None = None
+    ) -> RetrievalPlan:
         """Return either an LLM-generated plan or a deterministic fallback plan."""
+        if intent == IntentType.DIRECT:
+            return RetrievalPlan(
+                query_type=QueryType.CONVERSATIONAL,
+                complexity=Complexity.SIMPLE,
+                strategy=RetrievalStrategy.NONE,
+                rewritten_query=request.query,
+                decomposed_queries=[],
+                reasoning="Direct intent — LLM can answer without retrieval.",
+            )
         if request.enable_planner:
             plan = await self.planner.plan(request.query)
             strategy = self._resolve_strategy(plan.strategy.value, request)

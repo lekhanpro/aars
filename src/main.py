@@ -48,6 +48,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     from src.llm.client import LLMClient
     from src.ingestion.graph_builder import GraphBuilder
     from src.ingestion.pipeline import IngestionPipeline
+    from src.pipeline.graph_runner import GraphPipelineRunner
     from src.pipeline.orchestrator import PipelineOrchestrator
     from src.retrieval.graph import GraphRetriever
     from src.retrieval.keyword import KeywordRetriever
@@ -67,6 +68,13 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         keyword_retriever=app.state.keyword_retriever,
         graph_retriever=app.state.graph_retriever,
     )
+    try:
+        app.state.graph_runner = GraphPipelineRunner(app.state.orchestrator)
+        logger.info("graph_pipeline_ready")
+    except Exception as e:
+        logger.warning("graph_pipeline_unavailable", error=str(e))
+        app.state.graph_runner = None
+
     app.state.ingestion_pipeline = IngestionPipeline(
         chroma_client=app.state.chroma_client,
         settings=settings,
@@ -100,6 +108,7 @@ def create_app() -> FastAPI:
 
     # Import and mount routers
     from src.api.endpoints.debug import router as debug_router
+    from src.api.endpoints.documents import router as documents_router
     from src.api.endpoints.health import router as health_router
     from src.api.endpoints.ingest import router as ingest_router
     from src.api.endpoints.query import router as query_router
@@ -107,6 +116,7 @@ def create_app() -> FastAPI:
     app.include_router(health_router, prefix="/api/v1", tags=["health"])
     app.include_router(query_router, prefix="/api/v1", tags=["query"])
     app.include_router(ingest_router, prefix="/api/v1", tags=["ingest"])
+    app.include_router(documents_router, prefix="/api/v1", tags=["documents"])
     app.include_router(debug_router, prefix="/api/v1", tags=["debug"])
 
     return app

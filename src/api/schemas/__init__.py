@@ -4,10 +4,14 @@ from .common import (
     Citation,
     Complexity,
     Document,
+    GradedDocument,
+    HallucinationResult,
+    IntentType,
     QueryType,
     ReflectionResult,
     RetrievalPlan,
     RetrievalStrategy,
+    SelfRAGEvaluation,
 )
 from .requests import IngestRequest, QueryRequest
 from .responses import (
@@ -28,9 +32,12 @@ __all__ = [
     "Complexity",
     "Document",
     "ErrorResponse",
+    "GradedDocument",
+    "HallucinationResult",
     "HealthResponse",
     "IngestRequest",
     "IngestResponse",
+    "IntentType",
     "PipelineTrace",
     "QueryRequest",
     "QueryResponse",
@@ -38,5 +45,6 @@ __all__ = [
     "ReflectionResult",
     "RetrievalPlan",
     "RetrievalStrategy",
+    "SelfRAGEvaluation",
     "TraceStep",
 ]

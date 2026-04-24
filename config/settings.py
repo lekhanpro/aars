@@ -53,6 +53,21 @@ class ChunkerSettings(BaseSettings):
     overlap: int = Field(default=64, alias="CHUNK_OVERLAP")
 
 
+class RerankerSettings(BaseSettings):
+    model_config = {"env_prefix": "RERANKER_"}
+
+    model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    enabled: bool = True
+
+
+class HallucinationSettings(BaseSettings):
+    model_config = {"env_prefix": "HALLUCINATION_"}
+
+    nli_model: str = "cross-encoder/nli-deberta-v3-small"
+    mode: str = "llm"
+    threshold: float = 0.5
+
+
 class PipelineSettings(BaseSettings):
     model_config = {"env_prefix": "PIPELINE_"}
 
@@ -75,6 +90,8 @@ class Settings(BaseSettings):
     fusion: FusionSettings = FusionSettings()
     chunker: ChunkerSettings = ChunkerSettings()
     pipeline: PipelineSettings = PipelineSettings()
+    reranker: RerankerSettings = RerankerSettings()
+    hallucination: HallucinationSettings = HallucinationSettings()
 
 
 def get_settings() -> Settings:

@@ -4,7 +4,15 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-from .common import Citation, Document, ReflectionResult, RetrievalPlan
+from .common import (
+    Citation,
+    Document,
+    GradedDocument,
+    HallucinationResult,
+    ReflectionResult,
+    RetrievalPlan,
+    SelfRAGEvaluation,
+)
 
 
 class TraceStep(BaseModel):
@@ -28,6 +36,10 @@ class QueryResponse(BaseModel):
     retrieval_plan: RetrievalPlan | None = None
     reflection_results: list[ReflectionResult] = Field(default_factory=list)
     documents: list[Document] = Field(default_factory=list)
+    graded_documents: list[GradedDocument] = Field(default_factory=list)
+    hallucination_result: HallucinationResult | None = None
+    self_rag_evaluation: SelfRAGEvaluation | None = None
+    reranker_applied: bool = False
     trace: PipelineTrace | None = None
 
 

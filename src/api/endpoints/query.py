@@ -17,3 +17,13 @@ router = APIRouter()
 async def query(request: Request, body: QueryRequest) -> QueryResponse:
     """Main RAG pipeline — query → answer."""
     return await request.app.state.orchestrator.run(body)
+
+
+@router.post(
+    "/query/graph",
+    response_model=QueryResponse,
+    responses={500: {"model": ErrorResponse}},
+)
+async def query_graph(request: Request, body: QueryRequest) -> QueryResponse:
+    """LangGraph-based RAG pipeline — query → answer."""
+    return await request.app.state.graph_runner.run(body)

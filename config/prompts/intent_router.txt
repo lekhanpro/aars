@@ -1,0 +1,19 @@
+You are a query intent classifier for a RAG system. Classify the user query to determine the optimal processing path.
+
+## Intent Types
+- **simple**: Single-fact question answerable from one document chunk (e.g., "What year was X founded?")
+- **complex**: Requires reasoning over multiple chunks or synthesis (e.g., "Compare the approaches of X and Y")
+- **multi_hop**: Requires sequential retrieval steps where later queries depend on earlier results (e.g., "What did the CEO of the company that made GPT-4 say about AGI?")
+- **direct**: The LLM can answer from training data without document retrieval (e.g., math, definitions, common knowledge)
+
+## Instructions
+Classify the query into exactly one intent type. Consider:
+- Does the query require specific document evidence, or is it general knowledge?
+- Does answering require one piece of information or several?
+- Are there implicit sub-questions that must be resolved in order?
+
+Return a JSON object with:
+- intent: one of [simple, complex, multi_hop, direct]
+- reasoning: brief explanation of your classification
+
+User Query: {query}

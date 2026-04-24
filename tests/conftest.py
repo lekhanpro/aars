@@ -10,6 +10,11 @@ import pytest
 
 from config.settings import Settings
 from src.api.schemas import Document, ReflectionResult, RetrievalPlan
+from src.api.schemas.common import (
+    GradedDocument,
+    HallucinationResult,
+    SelfRAGEvaluation,
+)
 
 
 @pytest.fixture
@@ -85,6 +90,36 @@ def sample_reflection_insufficient():
         next_query="multi-head self-attention mechanism details",
         next_strategy="vector",
     )
+
+
+@pytest.fixture
+def sample_hallucination_result():
+    return HallucinationResult(
+        grounded=True,
+        score=0.95,
+        ungrounded_claims=[],
+        reasoning="All claims supported.",
+    )
+
+
+@pytest.fixture
+def sample_self_rag_evaluation():
+    return SelfRAGEvaluation(
+        faithfulness=0.90,
+        answer_relevancy=0.88,
+        context_precision=0.85,
+        context_recall=0.82,
+        overall=0.87,
+    )
+
+
+@pytest.fixture
+def sample_graded_documents():
+    return [
+        GradedDocument(doc_id="doc_1", relevant=True, reasoning="On topic."),
+        GradedDocument(doc_id="doc_2", relevant=True, reasoning="Provides context."),
+        GradedDocument(doc_id="doc_3", relevant=False, reasoning="Off topic."),
+    ]
 
 
 @pytest.fixture

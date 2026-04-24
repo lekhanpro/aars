@@ -21,6 +21,13 @@ class QueryRequest(BaseModel):
         default=RetrievalStrategy.VECTOR,
         description="Fallback retrieval strategy when planner is disabled or unavailable",
     )
+    enable_reranker: bool = Field(default=True, description="Enable cross-encoder reranking")
+    enable_hallucination_check: bool = Field(
+        default=True, description="Enable hallucination detection after generation"
+    )
+    enable_grading: bool = Field(
+        default=True, description="Enable per-document relevance grading"
+    )
     enable_trace: bool = Field(default=True, description="Return pipeline execution trace")
 
 
